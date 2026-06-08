@@ -245,10 +245,16 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;mi
         </div>
         <div>
           <div class="pie-card">
-            <div class="card-label">Today's completion</div>
-            <div class="pie-wrap">
-              <svg class="pie-svg" viewBox="0 0 120 120" id="todayPie"></svg>
-              <div class="pie-legend" id="pieLegend"></div>
+            <div class="card-label">Today's score</div>
+            <div style="margin-top:8px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+                <span style="font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:300;color:#fff;line-height:1" id="todayPct">0%</span>
+                <span style="font-size:9px;letter-spacing:.2em;color:var(--text3);text-transform:uppercase" id="todayFraction">0/0</span>
+              </div>
+              <div style="height:2px;background:var(--border2);border-radius:1px;overflow:hidden;margin-bottom:20px">
+                <div id="todayBar" style="height:100%;background:#39ff14;border-radius:1px;width:0%;transition:width .6s cubic-bezier(.4,0,.2,1)"></div>
+              </div>
+              <div id="todayMiniChart"></div>
             </div>
           </div>
         </div>
@@ -274,6 +280,13 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;mi
         <div class="stats-stack">
           <div class="stat-card">
             <div class="section-label">Month completion</div>
+            <div class="pie-wrap" style="margin-top:12px">
+              <svg class="pie-svg" viewBox="0 0 120 120" id="monthPie"></svg>
+              <div class="pie-legend" id="monthPieLegend"></div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="section-label">Month completion %</div>
             <div class="stat-big" id="monthPct">0<span class="stat-unit">%</span></div>
             <div class="pct-bar"><div class="pct-bar-fill" id="monthBar" style="width:0%"></div></div>
           </div>
@@ -456,7 +469,38 @@ async function renderToday() {
     list.appendChild(el);
   });
 
-  renderPie(log);
+  renderTodayChart(log);
+}
+
+function renderTodayChart(log) {
+  const done = habits.filter(h => log[h.id]).length;
+  const total = habits.length;
+  const pct = total > 0 ? Math.round(done/total*100) : 0;
+
+  const pctEl = document.getElementById('todayPct');
+  const fracEl = document.getElementById('todayFraction');
+  const barEl = document.getElementById('todayBar');
+  const chartEl = document.getElementById('todayMiniChart');
+
+  if (pctEl) pctEl.textContent = pct+'%';
+  if (fracEl) fracEl.textContent = done+'/'+total;
+  if (barEl) barEl.style.width = pct+'%';
+
+  // Mini bar chart — one bar per habit
+  if (chartEl) {
+    chartEl.innerHTML = '';
+    habits.forEach((h, idx) => {
+      const isDone = !!log[h.id];
+      chartEl.innerHTML += `
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span style="font-size:9px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;width:80px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${h.name}</span>
+          <div style="flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden">
+            <div style="height:100%;width:${isDone?'100':'0'}%;background:${isDone?'#39ff14':'var(--border2)'};border-radius:2px;transition:width .5s"></div>
+          </div>
+          <span style="font-size:9px;color:${isDone?'#39ff14':'var(--text3)'};width:14px;flex-shrink:0">${isDone?'✓':'—'}</span>
+        </div>`;
+    });
+  }
 }
 
 async function toggleHabit(id) {
@@ -661,6 +705,55 @@ async function renderMonthly() {
   }
 
   renderSparkline();
+  renderMonthlyPie(tDone, tPoss);
+}
+
+function renderMonthlyPie(done, total) {
+  const svg = document.getElementById('monthPie');
+  const legend = document.getElementById('monthPieLegend');
+  if (!svg) return;
+  const cx=60,cy=60,r=50,ir=28;
+  const notDone = total - done;
+  const pct = total > 0 ? Math.round(done/total*100) : 0;
+
+  if (total === 0) {
+    svg.innerHTML = `<circle cx="60" cy="60" r="50" fill="none" stroke="#2a2a2a" stroke-width="14"/>
+      <text x="60" y="65" text-anchor="middle" font-family="Cormorant Garamond,serif" font-size="13" fill="#444">No data</text>`;
+    if (legend) legend.innerHTML = ''; return;
+  }
+
+  const slices = [
+    {val: done,    color: '#39ff14', label: 'Completed'},
+    {val: notDone, color: '#2a2a2a', label: 'Remaining'},
+  ].filter(s => s.val > 0);
+
+  const px = (a,rad) => [cx+rad*Math.cos(a), cy+rad*Math.sin(a)];
+  let angle = -Math.PI/2;
+  let paths = '';
+
+  slices.forEach(s => {
+    const sweep = s.val/total*2*Math.PI;
+    const end = angle+sweep;
+    const [x1,y1]=px(angle,r),[x2,y2]=px(end,r);
+    const [ix1,iy1]=px(end,ir),[ix2,iy2]=px(angle,ir);
+    const lg = sweep>Math.PI?1:0;
+    paths += `<path d="M${x1},${y1} A${r},${r},0,${lg},1,${x2},${y2} L${ix1},${iy1} A${ir},${ir},0,${lg},0,${ix2},${iy2} Z" fill="${s.color}" stroke="#0d0d0d" stroke-width="1.5"/>`;
+    angle = end;
+  });
+
+  paths += `<text x="60" y="55" text-anchor="middle" font-family="Cormorant Garamond,serif" font-size="18" font-weight="300" fill="#fff">${pct}%</text>
+    <text x="60" y="67" text-anchor="middle" font-family="Rajdhani,sans-serif" font-size="7" letter-spacing="2" fill="#555">THIS MONTH</text>`;
+  svg.innerHTML = paths;
+
+  if (legend) legend.innerHTML = `
+    <div class="legend-item">
+      <div class="legend-l"><div class="legend-dot" style="background:#39ff14"></div><span class="legend-name">Completed</span></div>
+      <span class="legend-val">${done} habits</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-l"><div class="legend-dot" style="background:#333"></div><span class="legend-name">Remaining</span></div>
+      <span class="legend-val">${notDone} habits</span>
+    </div>`;
 }
 
 function renderSparkline() {
