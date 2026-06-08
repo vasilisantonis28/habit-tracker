@@ -87,13 +87,14 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;mi
 .habit-check{width:52px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-right:1px solid var(--border);transition:background .2s;flex-shrink:0;}
 .habit-check:hover{background:rgba(255,255,255,.05);}
 .hbox{width:15px;height:15px;border:1px solid var(--border2);border-radius:1px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
-.habit-item.done .hbox{background:var(--white);border-color:var(--white);}
+.habit-item.done .hbox{background:#39ff14;border-color:#39ff14;}
 .hcheck{color:#111;font-size:9px;font-weight:700;opacity:0;transition:opacity .2s;}
 .habit-item.done .hcheck{opacity:1;}
 
 .habit-body{flex:1;padding:13px 16px;cursor:pointer;min-width:0;}
 .habit-name{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--text);transition:color .2s;display:block;}
-.habit-item.done .habit-name{color:var(--white);}
+.habit-item.done .habit-name{color:#39ff14;}
+.habit-item.done::before{background:#39ff14;}
 .habit-desc{font-size:10px;color:var(--text3);margin-top:2px;display:block;}
 
 .habit-actions{display:flex;opacity:0;transition:opacity .2s;flex-shrink:0;}
