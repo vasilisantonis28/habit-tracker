@@ -227,7 +227,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
           <!-- MORNING -->
           <div class="category">
             <div class="cat-header">
-              <div class="cat-title"><span class="cat-icon">🌅</span> Morning <span class="cat-count" id="count-morning"></span></div>
+              <div class="cat-title">MORNING <span class="cat-count" id="count-morning"></span></div>
               <button class="add-btn" onclick="openAddModal('morning')">+ Add</button>
             </div>
             <div class="habit-list" id="list-morning" data-cat="morning"></div>
@@ -235,7 +235,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
           <!-- NIGHT -->
           <div class="category">
             <div class="cat-header">
-              <div class="cat-title"><span class="cat-icon">🌙</span> Night <span class="cat-count" id="count-night"></span></div>
+              <div class="cat-title">NIGHT <span class="cat-count" id="count-night"></span></div>
               <button class="add-btn" onclick="openAddModal('night')">+ Add</button>
             </div>
             <div class="habit-list" id="list-night" data-cat="night"></div>
@@ -243,7 +243,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
           <!-- OTHER -->
           <div class="category">
             <div class="cat-header">
-              <div class="cat-title"><span class="cat-icon">◆</span> Other <span class="cat-count" id="count-other"></span></div>
+              <div class="cat-title">OTHER <span class="cat-count" id="count-other"></span></div>
               <button class="add-btn" onclick="openAddModal('other')">+ Add</button>
             </div>
             <div class="habit-list" id="list-other" data-cat="other"></div>
@@ -310,14 +310,10 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
     <div class="modal-field">
       <label class="modal-lbl">Category</label>
       <select class="modal-select" id="addCat">
-        <option value="morning">🌅 Morning</option>
-        <option value="night">🌙 Night</option>
-        <option value="other">◆ Other</option>
+        <option value="morning">Morning</option>
+        <option value="night">Night</option>
+        <option value="other">Other</option>
       </select>
-    </div>
-    <div class="modal-field">
-      <label class="modal-lbl">Icon</label>
-      <input class="modal-input" id="addEmoji" maxlength="2" style="width:60px;text-align:center;font-size:16px" placeholder="🔥">
     </div>
     <div class="modal-field">
       <label class="modal-lbl">Name</label>
@@ -341,14 +337,10 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
     <div class="modal-field">
       <label class="modal-lbl">Category</label>
       <select class="modal-select" id="editCat">
-        <option value="morning">🌅 Morning</option>
-        <option value="night">🌙 Night</option>
-        <option value="other">◆ Other</option>
+        <option value="morning">Morning</option>
+        <option value="night">Night</option>
+        <option value="other">Other</option>
       </select>
-    </div>
-    <div class="modal-field">
-      <label class="modal-lbl">Icon</label>
-      <input class="modal-input" id="editEmoji" maxlength="2" style="width:60px;text-align:center;font-size:16px">
     </div>
     <div class="modal-field">
       <label class="modal-lbl">Name</label>
@@ -491,7 +483,7 @@ async function renderToday() {
           <div class="hbox"><span class="hcheck">✓</span></div>
         </div>
         <div class="habit-body" onclick="toggleHabit('${h.id}')">
-          <span class="habit-name">${h.emoji?h.emoji+' ':''}${h.name}</span>
+          <span class="habit-name">${h.name}</span>
           ${h.desc?`<span class="habit-desc">${h.desc}</span>`:''}
         </div>
         <div class="habit-actions">
@@ -647,7 +639,7 @@ async function openDayModal(key, label) {
   CATS.forEach(cat=>{
     const catHabits=habits.filter(h=>h.cat===cat);
     if(!catHabits.length) return;
-    const icons={'morning':'🌅','night':'🌙','other':'◆'};
+    const icons={'morning':'MORNING','night':'NIGHT','other':'OTHER'};
     list.innerHTML+=`<div style="font-size:9px;letter-spacing:.2em;color:var(--text3);text-transform:uppercase;margin:12px 0 6px">${icons[cat]} ${cat}</div>`;
     catHabits.forEach(h=>{
       const done=!!log[h.id];
@@ -655,7 +647,7 @@ async function openDayModal(key, label) {
         <div style="width:14px;height:14px;border:1px solid ${done?'#39ff14':'var(--border2)'};border-radius:1px;background:${done?'#39ff14':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
           ${done?'<span style="color:#111;font-size:8px;font-weight:700">✓</span>':''}
         </div>
-        <span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:${done?'#39ff14':'var(--text3)'}">${h.emoji||''} ${h.name}</span>
+        <span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:${done?'#39ff14':'var(--text3)'}"> ${h.name}</span>
       </div>`;
     });
   });
