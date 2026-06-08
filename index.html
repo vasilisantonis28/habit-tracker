@@ -324,6 +324,18 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;mi
   </div>
 </div>
 
+<!-- DAY HISTORY MODAL -->
+<div class="modal-overlay" id="dayModal">
+  <div class="modal">
+    <div class="modal-title" id="dayModalTitle">—</div>
+    <div style="margin-bottom:16px;font-size:9px;letter-spacing:.2em;color:var(--text3);text-transform:uppercase">Read only</div>
+    <div id="dayModalList"></div>
+    <div class="modal-actions" style="margin-top:20px">
+      <button class="form-btn no" onclick="closeDayModal()">Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -593,6 +605,30 @@ function openEdit(id) {
 
 function closeModal() { document.getElementById('editModal').classList.remove('open'); editingId=null; }
 
+async function openDayModal(key, label) {
+  const log = await fbGetLog(key);
+  document.getElementById('dayModalTitle').textContent = label;
+  const list = document.getElementById('dayModalList');
+  list.innerHTML = '';
+  habits.forEach(h => {
+    const done = !!log[h.id];
+    list.innerHTML += `
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+        <div style="width:16px;height:16px;border:1px solid ${done?'#39ff14':' var(--border2)'};border-radius:1px;background:${done?'#39ff14':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          ${done?'<span style="color:#111;font-size:9px;font-weight:700">✓</span>':''}
+        </div>
+        <span style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:${done?'#39ff14':'var(--text3)'}">${h.emoji||''} ${h.name}</span>
+      </div>`;
+  });
+  document.getElementById('dayModal').classList.add('open');
+}
+
+function closeDayModal() { document.getElementById('dayModal').classList.remove('open'); }
+
+document.getElementById('dayModal').addEventListener('click', e => {
+  if (e.target===document.getElementById('dayModal')) closeDayModal();
+});
+
 async function saveEdit() {
   if (!editingId) return;
   const h = habits.find(x=>x.id===editingId); if (!h) return;
@@ -660,6 +696,10 @@ async function renderMonthly() {
         });
         cell.appendChild(dd);
       }
+      // Clickable — open day history modal
+      cell.style.cursor='pointer';
+      const label = new Date(year,month,d).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+      cell.addEventListener('click', () => openDayModal(k, label));
     }
     grid.appendChild(cell);
   }
