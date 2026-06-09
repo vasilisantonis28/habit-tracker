@@ -361,7 +361,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
 <div class="modal-overlay" id="dayModal">
   <div class="modal">
     <div class="modal-title" id="dayModalTitle">—</div>
-    <div style="font-size:9px;letter-spacing:.2em;color:var(--text3);text-transform:uppercase;margin-bottom:16px">Read only</div>
+    <div style="font-size:9px;letter-spacing:.2em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Tap to toggle</div>
     <div id="dayModalList"></div>
     <div class="modal-actions"><button class="form-btn no" onclick="closeDayModal()">Close</button></div>
   </div>
@@ -471,6 +471,23 @@ async function renderToday() {
     const catHabits = habits.filter(h=>h.cat===cat);
     if(countEl) countEl.textContent = catHabits.length ? '('+catHabits.length+')' : '';
     list.innerHTML = '';
+
+    // Make the list container a drop zone for cross-category drops
+    list.ondragover = e => { e.preventDefault(); list.style.outline='1px dashed var(--border2)'; };
+    list.ondragleave = () => { list.style.outline='none'; };
+    list.ondrop = async e => {
+      e.preventDefault();
+      list.style.outline='none';
+      if (!dragSrcId) return;
+      const srcIdx = habits.findIndex(h=>h.id===dragSrcId);
+      if (srcIdx < 0) return;
+      // Only act if dropped on empty space (not on a habit item)
+      if (e.target.closest('.habit-item')) return;
+      habits[srcIdx].cat = cat;
+      await fbSaveHabits(habits);
+      renderToday();
+    };
+
     catHabits.forEach(h => {
       const done = !!log[h.id];
       const el = document.createElement('div');
@@ -630,32 +647,51 @@ async function deleteHabit(id) {
   renderToday();
 }
 
-// ── DAY MODAL ──
+// ── DAY MODAL (EDITABLE) ──
+let currentDayKey = null;
+
 async function openDayModal(key, label) {
-  const log = await fbGetLog(key);
+  currentDayKey = key;
   document.getElementById('dayModalTitle').textContent = label;
-  const list=document.getElementById('dayModalList');
-  list.innerHTML='';
-  CATS.forEach(cat=>{
-    const catHabits=habits.filter(h=>h.cat===cat);
-    if(!catHabits.length) return;
-    const icons={'morning':'MORNING','night':'NIGHT','other':'OTHER'};
-    list.innerHTML+=`<div style="font-size:9px;letter-spacing:.2em;color:var(--text3);text-transform:uppercase;margin:12px 0 6px">${icons[cat]} ${cat}</div>`;
-    catHabits.forEach(h=>{
-      const done=!!log[h.id];
-      list.innerHTML+=`<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)">
-        <div style="width:14px;height:14px;border:1px solid ${done?'#39ff14':'var(--border2)'};border-radius:1px;background:${done?'#39ff14':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          ${done?'<span style="color:#111;font-size:8px;font-weight:700">✓</span>':''}
-        </div>
-        <span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:${done?'#39ff14':'var(--text3)'}"> ${h.name}</span>
-      </div>`;
-    });
-  });
+  await renderDayModal();
   document.getElementById('dayModal').classList.add('open');
 }
-function closeDayModal() { document.getElementById('dayModal').classList.remove('open'); }
-document.getElementById('dayModal').addEventListener('click', e=>{
-  if(e.target===document.getElementById('dayModal')) closeDayModal();
+
+async function renderDayModal() {
+  const log = await fbGetLog(currentDayKey);
+  const list = document.getElementById('dayModalList');
+  list.innerHTML = '';
+  CATS.forEach(cat => {
+    const catHabits = habits.filter(h => h.cat === cat);
+    if (!catHabits.length) return;
+    const labels = {morning:'MORNING', night:'NIGHT', other:'OTHER'};
+    list.innerHTML += `<div style="font-size:9px;letter-spacing:.2em;color:var(--text3);text-transform:uppercase;margin:14px 0 6px">${labels[cat]}</div>`;
+    catHabits.forEach(h => {
+      const done = !!log[h.id];
+      list.innerHTML += `
+        <div onclick="toggleDayHabit('${h.id}')" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer">
+          <div style="width:15px;height:15px;border:1px solid ${done?'#39ff14':'var(--border2)'};border-radius:1px;background:${done?'#39ff14':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s">
+            ${done?'<span style="color:#111;font-size:9px;font-weight:700">✓</span>':''}
+          </div>
+          <span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:${done?'#39ff14':'var(--text2)'}">${h.name}</span>
+        </div>`;
+    });
+  });
+}
+
+async function toggleDayHabit(id) {
+  const log = await fbGetLog(currentDayKey);
+  log[id] = !log[id];
+  if (!log[id]) delete log[id];
+  await fbSaveLog(currentDayKey, log);
+  await renderDayModal();
+  // refresh monthly calendar in background
+  renderMonthly();
+}
+
+function closeDayModal() { document.getElementById('dayModal').classList.remove('open'); currentDayKey=null; }
+document.getElementById('dayModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('dayModal')) closeDayModal();
 });
 
 // ── MONTHLY ──
