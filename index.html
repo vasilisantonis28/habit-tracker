@@ -250,6 +250,10 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
       <span id="currentProfileName">—</span>
       <span class="profile-switch-arrow">⇄</span>
     </div>
+    <div class="profile-switch" onclick="restoreLegacyLogs()" style="border-top:none">
+      <span>Restore old history</span>
+      <span class="profile-switch-arrow">↺</span>
+    </div>
   </aside>
 
   <main class="main">
@@ -558,6 +562,32 @@ async function selectProfile(key, displayName) {
 function switchProfile() {
   document.getElementById('mainApp').style.display = 'none';
   showProfileScreen();
+}
+
+async function restoreLegacyLogs() {
+  if (!confirm('Pull old history (logs from before profiles) into "'+document.getElementById('currentProfileName').textContent+'"? This will overwrite any matching dates for this profile.')) return;
+  syncState('syncing');
+  try {
+    const legacyLogs = await window._fbGet('logs');
+    if (!legacyLogs) {
+      alert('No old history found at the root level.');
+      syncState('synced');
+      return;
+    }
+    let count = 0;
+    for (const k of Object.keys(legacyLogs)) {
+      await window._fbSet('users/'+currentProfile+'/logs/'+k, legacyLogs[k]);
+      logsCache[k] = legacyLogs[k];
+      count++;
+    }
+    syncState('synced');
+    alert('Restored '+count+' day(s) of history!');
+    renderToday();
+    if (document.getElementById('page-monthly').classList.contains('active')) renderMonthly();
+  } catch(e) {
+    syncState('error');
+    alert('Error restoring history.');
+  }
 }
 
 // ── INIT ──
