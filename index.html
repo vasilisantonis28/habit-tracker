@@ -55,6 +55,24 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
 .sidebar-day{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:300;color:var(--white);line-height:1;}
 .sidebar-rest{font-size:9px;letter-spacing:.2em;color:var(--text3);text-transform:uppercase;margin-top:4px;}
 
+/* PROFILE SCREEN */
+#profileScreen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:998;}
+#profileScreen.show{display:flex;}
+.profile-card{width:340px;padding:0 20px;}
+.profile-list-item{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:14px 18px;margin-bottom:8px;cursor:pointer;transition:all .2s;}
+.profile-list-item:hover{border-color:var(--text3);background:rgba(255,255,255,.03);}
+.profile-list-name{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);}
+.profile-list-arrow{color:var(--text3);font-size:12px;}
+.profile-list-del{color:var(--text3);font-size:11px;padding:4px 8px;border-radius:2px;transition:all .2s;}
+.profile-list-del:hover{color:#c0392b;background:rgba(192,57,43,.08);}
+.profile-new{display:flex;gap:8px;margin-top:20px;}
+.profile-empty{font-size:10px;letter-spacing:.15em;color:var(--text3);text-transform:uppercase;text-align:center;padding:20px 0;}
+
+/* PROFILE SWITCH (in sidebar) */
+.profile-switch{margin-top:auto;padding:16px 24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .2s;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);}
+.profile-switch:hover{background:rgba(255,255,255,.03);color:var(--text2);}
+.profile-switch-arrow{font-size:13px;}
+
 /* MAIN */
 .main{padding:44px 48px;overflow-y:auto;}
 .page{display:none;animation:fadeIn .3s ease;}
@@ -199,7 +217,22 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
   <div class="loader-sub">connecting to cloud...</div>
 </div>
 
-<div class="app">
+<!-- PROFILE SCREEN -->
+<div id="profileScreen">
+  <div class="profile-card">
+    <div class="loader-logo" style="margin-bottom:8px">⬡ HABIT TRACKER</div>
+    <div class="logo-sub" style="text-align:center;margin-bottom:32px">choose your profile</div>
+
+    <div id="profileList"></div>
+
+    <div class="profile-new">
+      <input class="modal-input" id="newProfileName" placeholder="New profile name..." maxlength="20">
+      <button class="form-btn ok" onclick="createProfile()">Create</button>
+    </div>
+  </div>
+</div>
+
+<div class="app" id="mainApp" style="display:none">
   <aside class="sidebar">
     <div class="logo-area">
       <span class="logo-main">⬡ HABIT TRACKER <span class="sync-dot" id="syncDot"></span></span>
@@ -212,6 +245,10 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
     <div class="sidebar-date">
       <div class="sidebar-day" id="sidebarDay"></div>
       <div class="sidebar-rest" id="sidebarRest"></div>
+    </div>
+    <div class="profile-switch" onclick="switchProfile()">
+      <span id="currentProfileName">—</span>
+      <span class="profile-switch-arrow">⇄</span>
     </div>
   </aside>
 
@@ -400,6 +437,7 @@ const CATS = ['morning','night','other'];
 let habits = [];
 let logsCache = {};
 let editingId = null;
+let currentProfile = null;
 
 function dateKey(d) {
   d = d || new Date();
@@ -408,29 +446,130 @@ function dateKey(d) {
 function uidGen() { return 'h'+Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
 function syncState(s) { const d=document.getElementById('syncDot'); if(d) d.className='sync-dot '+s; }
 
+// Sanitize a name into a safe Firebase key
+function sanitizeKey(name) {
+  return name.trim().toLowerCase().replace(/[.#$\[\]\/\s]+/g, '_').slice(0, 30);
+}
+
 // ── FIREBASE ──
 async function fbSaveHabits(arr) {
   syncState('syncing');
-  try { await window._fbSet('habits', arr); syncState('synced'); }
+  try { await window._fbSet('users/'+currentProfile+'/habits', arr); syncState('synced'); }
   catch(e) { syncState('error'); }
 }
 async function fbSaveLog(key, obj) {
   syncState('syncing');
-  try { await window._fbSet('logs/'+key, obj); logsCache[key]=obj; syncState('synced'); }
+  try { await window._fbSet('users/'+currentProfile+'/logs/'+key, obj); logsCache[key]=obj; syncState('synced'); }
   catch(e) { syncState('error'); }
 }
 async function fbGetLog(key) {
   if (logsCache[key]!==undefined) return logsCache[key];
-  try { const v=await window._fbGet('logs/'+key); logsCache[key]=v||{}; return logsCache[key]; }
+  try { const v=await window._fbGet('users/'+currentProfile+'/logs/'+key); logsCache[key]=v||{}; return logsCache[key]; }
   catch(e) { return {}; }
+}
+
+// ── PROFILES ──
+async function getProfileList() {
+  try {
+    const v = await window._fbGet('profiles');
+    return v || {};
+  } catch(e) { return {}; }
+}
+
+async function saveProfileList(list) {
+  try { await window._fbSet('profiles', list); } catch(e) {}
+}
+
+async function showProfileScreen() {
+  const loader = document.getElementById('loader');
+  loader.classList.add('hide');
+  setTimeout(()=>loader.remove(), 400);
+
+  const list = await getProfileList();
+  const listEl = document.getElementById('profileList');
+  listEl.innerHTML = '';
+  const keys = Object.keys(list);
+
+  if (!keys.length) {
+    listEl.innerHTML = `<div class="profile-empty">No profiles yet — create one below</div>`;
+  } else {
+    keys.forEach(key => {
+      const displayName = list[key];
+      const row = document.createElement('div');
+      row.className = 'profile-list-item';
+      row.innerHTML = `
+        <span class="profile-list-name">${displayName}</span>
+        <span style="display:flex;align-items:center;gap:10px">
+          <span class="profile-list-del" onclick="event.stopPropagation();deleteProfile('${key}','${displayName}')">remove</span>
+          <span class="profile-list-arrow">→</span>
+        </span>`;
+      row.addEventListener('click', () => selectProfile(key));
+      listEl.appendChild(row);
+    });
+  }
+
+  document.getElementById('profileScreen').classList.add('show');
+  document.getElementById('newProfileName').focus();
+}
+
+async function createProfile() {
+  const input = document.getElementById('newProfileName');
+  const name = input.value.trim();
+  if (!name) return;
+  const key = sanitizeKey(name);
+  if (!key) return;
+  const list = await getProfileList();
+  list[key] = name;
+  await saveProfileList(list);
+  input.value = '';
+  selectProfile(key, name);
+}
+
+document.getElementById('newProfileName').addEventListener('keydown', e => {
+  if (e.key === 'Enter') createProfile();
+});
+
+async function deleteProfile(key, displayName) {
+  if (!confirm('Remove profile "'+displayName+'"? This will delete their habits and progress.')) return;
+  const list = await getProfileList();
+  delete list[key];
+  await saveProfileList(list);
+  try { await window._fbSet('users/'+key, null); } catch(e) {}
+  showProfileScreen();
+}
+
+async function selectProfile(key, displayName) {
+  currentProfile = key;
+  // get display name if not passed
+  if (!displayName) {
+    const list = await getProfileList();
+    displayName = list[key] || key;
+  }
+  document.getElementById('currentProfileName').textContent = displayName;
+  document.getElementById('profileScreen').classList.remove('show');
+  document.getElementById('mainApp').style.display = 'grid';
+
+  // reset state and load this profile's data
+  habits = [];
+  logsCache = {};
+  await loadProfileData();
+}
+
+function switchProfile() {
+  document.getElementById('mainApp').style.display = 'none';
+  showProfileScreen();
 }
 
 // ── INIT ──
 async function initApp() {
   initDates();
+  await showProfileScreen();
+}
+
+async function loadProfileData() {
   try {
     syncState('syncing');
-    const saved = await window._fbGet('habits');
+    const saved = await window._fbGet('users/'+currentProfile+'/habits');
     habits = saved ? saved : JSON.parse(JSON.stringify(DEFAULTS));
     // migrate old habits without cat
     habits = habits.map(h => ({...h, cat: h.cat||'morning'}));
@@ -438,9 +577,6 @@ async function initApp() {
     syncState('synced');
   } catch(e) { habits=JSON.parse(JSON.stringify(DEFAULTS)); syncState('error'); }
   await fbGetLog(dateKey());
-  const loader=document.getElementById('loader');
-  loader.classList.add('hide');
-  setTimeout(()=>loader.remove(),500);
   renderToday();
 }
 
@@ -610,10 +746,9 @@ document.getElementById('addModal').addEventListener('click', e=>{
 function openEditModal(id) {
   const h=habits.find(x=>x.id===id); if(!h) return;
   editingId=id;
-  document.getElementById('editCat').value   = h.cat||'morning';
-  document.getElementById('editEmoji').value = h.emoji||'';
-  document.getElementById('editName').value  = h.name;
-  document.getElementById('editDesc').value  = h.desc||'';
+  document.getElementById('editCat').value  = h.cat||'morning';
+  document.getElementById('editName').value = h.name;
+  document.getElementById('editDesc').value = h.desc||'';
   document.getElementById('editModal').classList.add('open');
   document.getElementById('editName').focus();
 }
