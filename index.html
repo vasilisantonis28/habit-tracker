@@ -486,8 +486,10 @@ async function saveProfileList(list) {
 
 async function showProfileScreen() {
   const loader = document.getElementById('loader');
-  loader.classList.add('hide');
-  setTimeout(()=>loader.remove(), 400);
+  if (loader) {
+    loader.classList.add('hide');
+    setTimeout(()=>loader.remove(), 400);
+  }
 
   const list = await getProfileList();
   const listEl = document.getElementById('profileList');
