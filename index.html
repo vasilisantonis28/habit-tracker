@@ -569,11 +569,32 @@ async function initApp() {
 async function loadProfileData() {
   try {
     syncState('syncing');
-    const saved = await window._fbGet('users/'+currentProfile+'/habits');
-    habits = saved ? saved : JSON.parse(JSON.stringify(DEFAULTS));
-    // migrate old habits without cat
-    habits = habits.map(h => ({...h, cat: h.cat||'morning'}));
-    if (!saved) await fbSaveHabits(habits);
+    let saved = await window._fbGet('users/'+currentProfile+'/habits');
+
+    if (!saved) {
+      // First time for this profile — check for legacy root-level data to migrate
+      const legacyHabits = await window._fbGet('habits');
+      if (legacyHabits) {
+        habits = legacyHabits.map(h => ({...h, cat: h.cat||'morning'}));
+        await fbSaveHabits(habits);
+
+        // Migrate legacy logs too
+        try {
+          const legacyLogs = await window._fbGet('logs');
+          if (legacyLogs) {
+            for (const k of Object.keys(legacyLogs)) {
+              await window._fbSet('users/'+currentProfile+'/logs/'+k, legacyLogs[k]);
+              logsCache[k] = legacyLogs[k];
+            }
+          }
+        } catch(e) {}
+      } else {
+        habits = JSON.parse(JSON.stringify(DEFAULTS));
+        await fbSaveHabits(habits);
+      }
+    } else {
+      habits = saved.map(h => ({...h, cat: h.cat||'morning'}));
+    }
     syncState('synced');
   } catch(e) { habits=JSON.parse(JSON.stringify(DEFAULTS)); syncState('error'); }
   await fbGetLog(dateKey());
