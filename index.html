@@ -222,13 +222,16 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
   <div class="profile-card">
     <div class="loader-logo" style="margin-bottom:8px">⬡ HABIT TRACKER</div>
     <div class="logo-sub" style="text-align:center;margin-bottom:32px">choose your profile</div>
-
     <div id="profileList"></div>
+  </div>
 
-    <div class="profile-new">
-      <input class="modal-input" id="newProfileName" placeholder="New profile name..." maxlength="20">
-      <button class="form-btn ok" onclick="createProfile()">Create</button>
-    </div>
+  <!-- + FAB button bottom right -->
+  <div id="profileFab" onclick="toggleNewProfileForm()" style="position:fixed;bottom:32px;right:32px;width:48px;height:48px;background:var(--white);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px;color:#111;font-weight:300;transition:all .2s;user-select:none;">+</div>
+
+  <!-- New profile form (hidden by default) -->
+  <div id="newProfileForm" style="position:fixed;bottom:96px;right:32px;background:var(--surface2);border:1px solid var(--border2);border-radius:2px;padding:16px;display:none;gap:8px;flex-direction:column;min-width:220px;">
+    <input class="modal-input" id="newProfileName" placeholder="Profile name..." maxlength="20" style="width:100%">
+    <button class="form-btn ok" onclick="createProfile()" style="width:100%">Create</button>
   </div>
 </div>
 
@@ -497,22 +500,39 @@ async function showProfileScreen() {
   const keys = Object.keys(list);
 
   if (!keys.length) {
-    listEl.innerHTML = `<div class="profile-empty">No profiles yet — create one below</div>`;
+    listEl.innerHTML = `<div class="profile-empty">No profiles yet — tap + to create one</div>`;
   } else {
     keys.forEach(key => {
       const displayName = list[key];
       const row = document.createElement('div');
       row.className = 'profile-list-item';
-      row.innerHTML = `
-        <span class="profile-list-name">${displayName}</span>
-        <span style="display:flex;align-items:center;gap:10px">
-          <span class="profile-list-del" onclick="event.stopPropagation();deleteProfile('${key}','${displayName}')">remove</span>
-          <span class="profile-list-arrow">→</span>
-        </span>`;
-      row.addEventListener('click', () => selectProfile(key));
+      row.innerHTML = deleteMode
+        ? `<span class="profile-list-name">${displayName}</span>
+           <span class="profile-list-del" style="color:#c0392b;font-size:18px;padding:4px 10px">−</span>`
+        : `<span class="profile-list-name">${displayName}</span>`;
+      if (deleteMode) {
+        row.querySelector('.profile-list-del').addEventListener('click', e => {
+          e.stopPropagation();
+          deleteProfile(key, displayName);
+        });
+      } else {
+        row.addEventListener('click', () => selectProfile(key));
+      }
       listEl.appendChild(row);
     });
   }
+
+  // Show/hide − FAB
+  let minusFab = document.getElementById('profileMinusFab');
+  if (!minusFab) {
+    minusFab = document.createElement('div');
+    minusFab.id = 'profileMinusFab';
+    minusFab.onclick = enterDeleteMode;
+    minusFab.style.cssText = 'position:fixed;bottom:32px;left:32px;width:48px;height:48px;background:var(--surface2);border:1px solid var(--border2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px;color:var(--text3);transition:all .2s;user-select:none;';
+    minusFab.textContent = '−';
+    document.getElementById('profileScreen').appendChild(minusFab);
+  }
+  minusFab.style.display = keys.length ? 'flex' : 'none';
 
   document.getElementById('profileScreen').classList.add('show');
   document.getElementById('newProfileName').focus();
@@ -531,8 +551,37 @@ async function createProfile() {
   selectProfile(key, name);
 }
 
+let deleteMode = false;
+
+function toggleNewProfileForm() {
+  const form = document.getElementById('newProfileForm');
+  const fab = document.getElementById('profileFab');
+  if (deleteMode) {
+    deleteMode = false;
+    fab.textContent = '+';
+    fab.style.background = 'var(--white)';
+    showProfileScreen();
+    return;
+  }
+  const isOpen = form.style.display === 'flex';
+  form.style.display = isOpen ? 'none' : 'flex';
+  if (!isOpen) document.getElementById('newProfileName').focus();
+}
+
+function enterDeleteMode() {
+  deleteMode = true;
+  const fab = document.getElementById('profileFab');
+  fab.textContent = '×';
+  fab.style.background = '#c0392b';
+  fab.style.color = '#fff';
+  showProfileScreen();
+}
+
 document.getElementById('newProfileName').addEventListener('keydown', e => {
   if (e.key === 'Enter') createProfile();
+  if (e.key === 'Escape') {
+    document.getElementById('newProfileForm').style.display = 'none';
+  }
 });
 
 async function deleteProfile(key, displayName) {
@@ -541,6 +590,9 @@ async function deleteProfile(key, displayName) {
   delete list[key];
   await saveProfileList(list);
   try { await window._fbSet('users/'+key, null); } catch(e) {}
+  deleteMode = false;
+  const fab = document.getElementById('profileFab');
+  if (fab) { fab.textContent = '+'; fab.style.background = 'var(--white)'; fab.style.color = '#111'; }
   showProfileScreen();
 }
 
