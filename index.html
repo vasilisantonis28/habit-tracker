@@ -225,11 +225,14 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
     <div id="profileList"></div>
   </div>
 
-  <!-- + FAB button bottom right -->
-  <div id="profileFab" onclick="toggleNewProfileForm()" style="position:fixed;bottom:32px;right:32px;width:48px;height:48px;background:var(--white);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px;color:#111;font-weight:300;transition:all .2s;user-select:none;">+</div>
+  <!-- Bottom right menu: + and - -->
+  <div style="position:fixed;bottom:32px;right:32px;display:flex;flex-direction:column;align-items:center;gap:16px;">
+    <div id="profileMinusBtn" onclick="enterDeleteMode()" style="display:none;font-size:28px;color:var(--text3);cursor:pointer;line-height:1;user-select:none;transition:color .2s;">−</div>
+    <div id="profileFab" onclick="toggleNewProfileForm()" style="font-size:28px;color:var(--white);cursor:pointer;line-height:1;user-select:none;transition:color .2s;">+</div>
+  </div>
 
-  <!-- New profile form (hidden by default) -->
-  <div id="newProfileForm" style="position:fixed;bottom:96px;right:32px;background:var(--surface2);border:1px solid var(--border2);border-radius:2px;padding:16px;display:none;gap:8px;flex-direction:column;min-width:220px;">
+  <!-- New profile form -->
+  <div id="newProfileForm" style="position:fixed;bottom:90px;right:32px;background:var(--surface2);border:1px solid var(--border2);border-radius:2px;padding:16px;display:none;gap:8px;flex-direction:column;min-width:220px;">
     <input class="modal-input" id="newProfileName" placeholder="Profile name..." maxlength="20" style="width:100%">
     <button class="form-btn ok" onclick="createProfile()" style="width:100%">Create</button>
   </div>
@@ -506,9 +509,10 @@ async function showProfileScreen() {
       const displayName = list[key];
       const row = document.createElement('div');
       row.className = 'profile-list-item';
+      row.style.justifyContent = 'center';
       row.innerHTML = deleteMode
-        ? `<span class="profile-list-name">${displayName}</span>
-           <span class="profile-list-del" style="color:#c0392b;font-size:18px;padding:4px 10px">−</span>`
+        ? `<span class="profile-list-del" style="color:#c0392b;font-size:18px;margin-right:12px">−</span>
+           <span class="profile-list-name">${displayName}</span>`
         : `<span class="profile-list-name">${displayName}</span>`;
       if (deleteMode) {
         row.querySelector('.profile-list-del').addEventListener('click', e => {
@@ -522,17 +526,9 @@ async function showProfileScreen() {
     });
   }
 
-  // Show/hide − FAB
-  let minusFab = document.getElementById('profileMinusFab');
-  if (!minusFab) {
-    minusFab = document.createElement('div');
-    minusFab.id = 'profileMinusFab';
-    minusFab.onclick = enterDeleteMode;
-    minusFab.style.cssText = 'position:fixed;bottom:32px;left:32px;width:48px;height:48px;background:var(--surface2);border:1px solid var(--border2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px;color:var(--text3);transition:all .2s;user-select:none;';
-    minusFab.textContent = '−';
-    document.getElementById('profileScreen').appendChild(minusFab);
-  }
-  minusFab.style.display = keys.length ? 'flex' : 'none';
+  // Show/hide − button
+  const minusBtn = document.getElementById('profileMinusBtn');
+  if (minusBtn) minusBtn.style.display = keys.length ? 'block' : 'none';
 
   document.getElementById('profileScreen').classList.add('show');
   document.getElementById('newProfileName').focus();
@@ -554,15 +550,12 @@ async function createProfile() {
 let deleteMode = false;
 
 function toggleNewProfileForm() {
-  const form = document.getElementById('newProfileForm');
-  const fab = document.getElementById('profileFab');
   if (deleteMode) {
     deleteMode = false;
-    fab.textContent = '+';
-    fab.style.background = 'var(--white)';
     showProfileScreen();
     return;
   }
+  const form = document.getElementById('newProfileForm');
   const isOpen = form.style.display === 'flex';
   form.style.display = isOpen ? 'none' : 'flex';
   if (!isOpen) document.getElementById('newProfileName').focus();
@@ -570,10 +563,6 @@ function toggleNewProfileForm() {
 
 function enterDeleteMode() {
   deleteMode = true;
-  const fab = document.getElementById('profileFab');
-  fab.textContent = '×';
-  fab.style.background = '#c0392b';
-  fab.style.color = '#fff';
   showProfileScreen();
 }
 
@@ -585,14 +574,12 @@ document.getElementById('newProfileName').addEventListener('keydown', e => {
 });
 
 async function deleteProfile(key, displayName) {
-  if (!confirm('Remove profile "'+displayName+'"? This will delete their habits and progress.')) return;
+  if (!confirm('Remove profile "'+displayName+'"?')) return;
   const list = await getProfileList();
   delete list[key];
   await saveProfileList(list);
   try { await window._fbSet('users/'+key, null); } catch(e) {}
   deleteMode = false;
-  const fab = document.getElementById('profileFab');
-  if (fab) { fab.textContent = '+'; fab.style.background = 'var(--white)'; fab.style.color = '#111'; }
   showProfileScreen();
 }
 
