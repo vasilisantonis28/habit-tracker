@@ -58,7 +58,9 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
 /* PROFILE SCREEN */
 #profileScreen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:998;}
 #profileScreen.show{display:flex;}
-.profile-card{width:340px;padding:0 20px;}
+.profile-card{width:340px;padding:0 20px;display:flex;flex-direction:column;align-items:center;}
+.profile-card .loader-logo{text-align:center;}
+#profileList{width:100%;}
 .profile-list-item{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:14px 18px;margin-bottom:8px;cursor:pointer;transition:all .2s;}
 .profile-list-item:hover{border-color:var(--text3);background:rgba(255,255,255,.03);}
 .profile-list-name{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);}
