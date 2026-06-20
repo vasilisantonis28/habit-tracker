@@ -151,6 +151,12 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
 .mini-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .mini-bar-track{width:60px;height:3px;background:var(--border);border-radius:1px;overflow:hidden;flex-shrink:0;}
 .mini-bar-fill{height:100%;border-radius:1px;transition:width .5s;}
+.bar-chart{display:flex;flex-direction:column;gap:9px;}
+.bar-row{display:flex;align-items:center;gap:8px;}
+.bar-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;width:70px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bar-track{flex:1;height:4px;background:var(--border);border-radius:1px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:1px;background:var(--neon);transition:width .6s;}
+.bar-val{font-size:9px;color:var(--text3);width:28px;flex-shrink:0;text-align:right;}
 .mini-check{font-size:10px;width:14px;flex-shrink:0;text-align:right;}
 
 /* MONTHLY */
@@ -344,6 +350,10 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
           <div class="stat-card">
             <div class="card-label">Current streak</div>
             <div class="stat-big" id="streakNum">0<span class="stat-unit"> days</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="card-label">Per-habit completion</div>
+            <div class="bar-chart" id="habitBars" style="margin-top:14px"></div>
           </div>
         </div>
       </div>
@@ -953,6 +963,8 @@ async function renderMonthly() {
   for(let i=0;i<fdow;i++){const e=document.createElement('div');e.className='cal-day empty';grid.appendChild(e);}
 
   let full=0,partial=0,missed=0,tPoss=0,tDone=0;
+  const habitDone = {};
+  habits.forEach(h => habitDone[h.id] = 0);
 
   for(let d=1;d<=dim;d++){
     const cell=document.createElement('div'); cell.className='cal-day';
@@ -965,6 +977,7 @@ async function renderMonthly() {
       const cnt=habits.filter(h=>log[h.id]).length;
       const tot=habits.length;
       tPoss+=tot; tDone+=cnt;
+      habits.forEach(h=>{ if(log[h.id]) habitDone[h.id]++; });
       if(d===today) cell.classList.add('today-cell');
       if(tot===0) cell.classList.add('nodata');
       else if(cnt===tot){cell.classList.add('full');full++;}
@@ -1001,7 +1014,27 @@ async function renderMonthly() {
   const sn=document.getElementById('streakNum'); if(sn) sn.innerHTML=streak+'<span class="stat-unit"> days</span>';
 
   renderMonthlyPie(tDone,tPoss);
+  renderHabitBars(habitDone, today);
   renderSparkline();
+}
+
+function renderHabitBars(habitDone, daysPassed) {
+  const el = document.getElementById('habitBars');
+  if (!el) return;
+  el.innerHTML = '';
+  if (!habits.length) {
+    el.innerHTML = '<div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em">No habits yet</div>';
+    return;
+  }
+  habits.forEach(h => {
+    const pct = daysPassed > 0 ? Math.round((habitDone[h.id]||0) / daysPassed * 100) : 0;
+    el.innerHTML += `
+      <div class="bar-row">
+        <span class="bar-lbl">${h.name}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <span class="bar-val">${pct}%</span>
+      </div>`;
+  });
 }
 
 function renderMonthlyPie(done,total) {
