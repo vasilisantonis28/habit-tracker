@@ -947,7 +947,8 @@ async function renderMonthly() {
   const now=new Date();
   const year=now.getFullYear(), month=now.getMonth(), today=now.getDate();
   const dim=new Date(year,month+1,0).getDate();
-  const fdow=new Date(year,month,1).getDay();
+  const rawDow=new Date(year,month,1).getDay(); // 0=Sun..6=Sat
+  const fdow=(rawDow+6)%7; // shift so Monday=0..Sunday=6
   const lbl=document.getElementById('calLabel');
   if(lbl) lbl.textContent=now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
 
@@ -957,7 +958,7 @@ async function renderMonthly() {
 
   const grid=document.getElementById('calGrid');
   grid.innerHTML='';
-  ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d=>{
+  ['Mo','Tu','We','Th','Fr','Sa','Su'].forEach(d=>{
     const h=document.createElement('div'); h.className='cal-head'; h.textContent=d; grid.appendChild(h);
   });
   for(let i=0;i<fdow;i++){const e=document.createElement('div');e.className='cal-day empty';grid.appendChild(e);}
