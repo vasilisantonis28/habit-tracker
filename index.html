@@ -1137,7 +1137,7 @@ function initSparkTooltip(svg) {
     const date = el.getAttribute('data-date');
     const x = el.getAttribute('data-x');
     const y = el.getAttribute('data-y');
-    tip.innerHTML = `<strong style="color:#39ff14">${frac}</strong> habits — ${date}`;
+    tip.innerHTML = `<strong style="color:#39ff14">${frac}</strong>`;
     tip.style.left = (parseFloat(x)/svg.clientWidth*100) + '%';
     tip.style.top = (parseFloat(y)/60*100) + '%';
     tip.style.display = 'block';
