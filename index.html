@@ -1073,11 +1073,14 @@ function renderSparkline() {
   const svg=document.getElementById('sparkSvg');
   if(!svg) return;
   const W=svg.clientWidth||600, H=60, days=30, pad=4;
-  const now=new Date(); const pts=[];
+  const now=new Date(); const pts=[]; const counts=[]; const dateLabels=[];
   for(let i=days-1;i>=0;i--){
     const d=new Date(now); d.setDate(d.getDate()-i);
     const k=dateKey(d); const log=logsCache[k]||{};
-    pts.push(habits.length>0?habits.filter(h=>log[h.id]).length/habits.length:0);
+    const cnt = habits.filter(h=>log[h.id]).length;
+    counts.push(cnt);
+    dateLabels.push(d.toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+    pts.push(habits.length>0?cnt/habits.length:0);
   }
   const xStep=W/(days-1);
   let area=`M0,${H}`, line='', first=true;
@@ -1092,6 +1095,14 @@ function renderSparkline() {
     const y=H-pad-v*(H-pad*2);
     grid+=`<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="#1a1a1a" stroke-width="1"/>`;
   });
+
+  // Invisible hover/touch targets + visible dot markers (shown on hover via JS)
+  let touchPoints = '';
+  pts.forEach((p,i)=>{
+    const x=i*xStep, y=H-pad-p*(H-pad*2);
+    touchPoints += `<circle class="spark-point" data-x="${x}" data-y="${y}" data-frac="${counts[i]}/${habits.length}" data-date="${dateLabels[i]}" cx="${x}" cy="${y}" r="9" fill="transparent" style="cursor:pointer"/>`;
+  });
+
   svg.innerHTML=`<defs>
     <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#39ff14" stop-opacity="0.3"/>
@@ -1101,7 +1112,53 @@ function renderSparkline() {
       <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   </defs>${grid}
   <path d="${area}" fill="url(#sg)"/>
-  <path d="${line}" fill="none" stroke="#39ff14" stroke-width="1.5" stroke-linejoin="round" filter="url(#glow)"/>`;
+  <path d="${line}" fill="none" stroke="#39ff14" stroke-width="1.5" stroke-linejoin="round" filter="url(#glow)"/>
+  <circle id="sparkHoverDot" cx="0" cy="0" r="3" fill="#39ff14" style="display:none;pointer-events:none"/>
+  ${touchPoints}`;
+
+  initSparkTooltip(svg);
+}
+
+function initSparkTooltip(svg) {
+  // Create tooltip element once, positioned relative to the spark-card
+  let tip = document.getElementById('sparkTooltip');
+  const card = svg.closest('.spark-card');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'sparkTooltip';
+    tip.style.cssText = 'position:absolute;background:var(--surface2);border:1px solid var(--border2);border-radius:2px;padding:6px 10px;font-size:10px;letter-spacing:.05em;color:var(--text);pointer-events:none;display:none;z-index:50;white-space:nowrap;transform:translate(-50%,-130%);box-shadow:0 4px 12px rgba(0,0,0,.4);';
+    card.style.position = 'relative';
+    card.appendChild(tip);
+  }
+  const hoverDot = document.getElementById('sparkHoverDot');
+
+  function showTip(el, clientX, clientY) {
+    const frac = el.getAttribute('data-frac');
+    const date = el.getAttribute('data-date');
+    const x = el.getAttribute('data-x');
+    const y = el.getAttribute('data-y');
+    tip.innerHTML = `<strong style="color:#39ff14">${frac}</strong> habits — ${date}`;
+    tip.style.left = (parseFloat(x)/svg.clientWidth*100) + '%';
+    tip.style.top = (parseFloat(y)/60*100) + '%';
+    tip.style.display = 'block';
+    hoverDot.setAttribute('cx', x);
+    hoverDot.setAttribute('cy', y);
+    hoverDot.style.display = 'block';
+  }
+  function hideTip() {
+    tip.style.display = 'none';
+    hoverDot.style.display = 'none';
+  }
+
+  svg.querySelectorAll('.spark-point').forEach(el => {
+    el.addEventListener('mouseenter', () => showTip(el));
+    el.addEventListener('mouseleave', hideTip);
+    el.addEventListener('touchstart', e => { e.preventDefault(); showTip(el); }, {passive:false});
+  });
+  svg.addEventListener('touchend', () => setTimeout(hideTip, 1500));
+  document.addEventListener('click', e => {
+    if (!svg.contains(e.target)) hideTip();
+  });
 }
 </script>
 </body>
