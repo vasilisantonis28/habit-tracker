@@ -303,6 +303,13 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
             </div>
             <div class="habit-list" id="list-other" data-cat="other"></div>
           </div>
+          <!-- BIRTHDAYS — shown only on matching day -->
+          <div class="category" id="birthdaySection" style="display:none">
+            <div class="cat-header">
+              <div class="cat-title" style="color:#fff;letter-spacing:.3em">BIRTHDAY</div>
+            </div>
+            <div id="birthdayList"></div>
+          </div>
         </div>
 
         <!-- RIGHT PANEL -->
@@ -456,6 +463,47 @@ const DEFAULTS = [
   {id:'h3', cat:'morning', emoji:'🧱', name:'Wall Hack',     desc:'10 minutes'},
 ];
 const CATS = ['morning','night','other'];
+
+// Birthdays — format: { name, month (1-12), day }
+const BIRTHDAYS = [
+  { id:'bday1', name:'Test Birthday', month:6, day:22 },
+];
+
+function isBirthday(b) {
+  const now = new Date();
+  return now.getMonth()+1 === b.month && now.getDate() === b.day;
+}
+
+async function renderBirthdays(log) {
+  const section = document.getElementById('birthdaySection');
+  const list = document.getElementById('birthdayList');
+  const todays = BIRTHDAYS.filter(isBirthday);
+  if (!todays.length) { section.style.display='none'; return; }
+  section.style.display='block';
+  list.innerHTML='';
+  todays.forEach(b => {
+    const done = !!log['bday_'+b.id];
+    const el = document.createElement('div');
+    el.className = 'habit-item'+(done?' done':'');
+    el.innerHTML = `
+      <div class="habit-check" onclick="toggleBirthday('${b.id}')">
+        <div class="hbox"><span class="hcheck">✓</span></div>
+      </div>
+      <div class="habit-body" onclick="toggleBirthday('${b.id}')">
+        <span class="habit-name">🎂 ${b.name}</span>
+        <span class="habit-desc">Today is their birthday!</span>
+      </div>`;
+    list.appendChild(el);
+  });
+}
+
+async function toggleBirthday(id) {
+  const log = await fbGetLog(dateKey());
+  log['bday_'+id] = !log['bday_'+id];
+  if (!log['bday_'+id]) delete log['bday_'+id];
+  await fbSaveLog(dateKey(), log);
+  renderToday();
+}
 let habits = [];
 let logsCache = {};
 let editingId = null;
@@ -804,6 +852,7 @@ async function renderToday() {
   });
 
   renderTodayChart(log);
+  renderBirthdays(log);
 }
 
 let dragSrcId = null;
