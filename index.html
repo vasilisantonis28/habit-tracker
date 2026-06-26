@@ -1,1226 +1,2449 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Habit Tracker</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Rajdhani:wght@300;400;500&display=swap" rel="stylesheet">
+
 <style>
+
 :root {
-  --bg: #0d0d0d;
-  --surface: #161616;
-  --surface2: #1e1e1e;
-  --border: #2a2a2a;
-  --border2: #333333;
-  --text: #ffffff;
-  --text2: #e0e0e0;
-  --text3: #aaaaaa;
-  --neon: #39ff14;
-  --white: #ffffff;
+
+  --bg: #0d0d0d;
+
+  --surface: #161616;
+
+  --surface2: #1e1e1e;
+
+  --border: #2a2a2a;
+
+  --border2: #333333;
+
+  --text: #ffffff;
+
+  --text2: #e0e0e0;
+
+  --text3: #aaaaaa;
+
+  --neon: #39ff14;
+
+  --white: #ffffff;
+
 }
+
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+
 html{scroll-behavior:smooth;}
+
 body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;font-weight:600;min-height:100vh;letter-spacing:.01em;}
+
 ::-webkit-scrollbar{width:4px;}
+
 ::-webkit-scrollbar-track{background:var(--bg);}
+
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
 
+
+
 /* LOADER */
+
 #loader{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;transition:opacity .4s;}
+
 #loader.hide{opacity:0;pointer-events:none;}
+
 .loader-logo{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:var(--white);letter-spacing:.3em;margin-bottom:16px;}
+
 .loader-bar{width:180px;height:1px;background:var(--border2);border-radius:1px;overflow:hidden;}
+
 .loader-fill{height:100%;width:0%;background:var(--white);animation:loadAnim 1.5s ease forwards;}
+
 @keyframes loadAnim{to{width:100%;}}
+
 .loader-sub{font-size:9px;letter-spacing:.3em;color:var(--text3);text-transform:uppercase;margin-top:12px;}
 
+
+
 /* LAYOUT */
+
 .app{display:grid;grid-template-columns:240px 1fr;min-height:100vh;}
 
+
+
 /* SIDEBAR */
+
 .sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+
 .logo-area{padding:32px 24px 24px;border-bottom:1px solid var(--border);}
+
 .logo-main{font-family:'Cormorant Garamond',serif;font-size:18px;letter-spacing:.3em;color:var(--white);font-weight:300;display:block;margin-bottom:4px;}
+
 .logo-sub{font-size:9px;letter-spacing:.3em;color:var(--text3);text-transform:uppercase;}
+
 .sync-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--text3);margin-left:8px;vertical-align:middle;transition:background .3s;}
+
 .sync-dot.syncing{background:#fff;animation:pulse .7s infinite alternate;}
+
 .sync-dot.synced{background:#2d7a4f;}
+
 .sync-dot.error{background:#7a2d2d;}
+
 @keyframes pulse{to{opacity:.2;}}
+
 .nav{padding:16px 0;flex:1;}
+
 .nav-item{display:flex;align-items:center;gap:12px;padding:12px 24px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);cursor:pointer;transition:all .2s;border-left:2px solid transparent;user-select:none;}
+
 .nav-item:hover{color:var(--text2);background:rgba(255,255,255,.02);}
+
 .nav-item.active{color:var(--white);border-left-color:var(--white);background:rgba(255,255,255,.04);}
+
 .sidebar-date{padding:20px 24px;border-top:1px solid var(--border);}
+
 .sidebar-day{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:300;color:var(--white);line-height:1;}
+
 .sidebar-rest{font-size:9px;letter-spacing:.2em;color:var(--text3);text-transform:uppercase;margin-top:4px;}
 
+
+
 /* PROFILE SCREEN */
+
 #profileScreen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:998;}
+
 #profileScreen.show{display:flex;}
+
 .profile-card{width:340px;padding:0 20px;display:flex;flex-direction:column;align-items:center;}
+
 .profile-card .loader-logo{text-align:center;}
+
 #profileList{width:100%;}
+
 .profile-list-item{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:14px 18px;margin-bottom:8px;cursor:pointer;transition:all .2s;}
+
 .profile-list-item:hover{border-color:var(--text3);background:rgba(255,255,255,.03);}
+
 .profile-list-name{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);}
+
 .profile-list-arrow{color:var(--text3);font-size:12px;}
+
 .profile-list-del{color:var(--text3);font-size:11px;padding:4px 8px;border-radius:2px;transition:all .2s;}
+
 .profile-list-del:hover{color:#c0392b;background:rgba(192,57,43,.08);}
+
 .profile-new{display:flex;gap:8px;margin-top:20px;}
+
 .profile-empty{font-size:10px;letter-spacing:.15em;color:var(--text3);text-transform:uppercase;text-align:center;padding:20px 0;}
 
+
+
 /* PROFILE SWITCH (in sidebar) */
+
 .profile-switch{margin-top:auto;padding:16px 24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .2s;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);}
+
 .profile-switch:hover{background:rgba(255,255,255,.03);color:var(--text2);}
+
 .profile-switch-arrow{font-size:13px;}
 
+
+
 /* MAIN */
+
 .main{padding:44px 48px;overflow-y:auto;}
+
 .page{display:none;animation:fadeIn .3s ease;}
+
 .page.active{display:block;}
+
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
 .page-header{margin-bottom:36px;padding-bottom:20px;border-bottom:1px solid var(--border);}
+
 .page-title{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:300;color:var(--white);line-height:1;}
+
 .page-title span{color:var(--text3);}
 
+
+
 /* TODAY GRID */
+
 .today-grid{display:grid;grid-template-columns:1fr 260px;gap:24px;align-items:start;}
 
+
+
 /* CATEGORY */
+
 .category{margin-bottom:28px;}
+
 .cat-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+
 .cat-title{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--text3);display:flex;align-items:center;gap:8px;}
+
 .cat-icon{font-size:14px;}
+
 .cat-count{font-size:9px;color:var(--border2);letter-spacing:.1em;}
+
 .add-btn{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text2);cursor:pointer;background:none;border:1px solid var(--border2);padding:5px 10px;border-radius:2px;font-family:'Rajdhani',sans-serif;transition:all .2s;}
+
 .add-btn:hover{border-color:var(--text2);color:var(--white);}
 
+
+
 /* HABIT ITEM */
+
 .habit-item{display:flex;align-items:stretch;background:var(--surface);border:1px solid var(--border);margin-bottom:5px;border-radius:2px;position:relative;overflow:hidden;transition:all .2s;}
+
 .habit-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--border2);transition:background .2s;}
+
 .habit-item.done::before{background:var(--neon);}
+
 .habit-item.done{border-color:rgba(57,255,20,.15);background:rgba(57,255,20,.02);}
+
 .habit-item.dragging{opacity:.4;border-style:dashed;}
+
 .habit-item.drag-over{border-color:var(--white);transform:translateY(-2px);}
 
+
+
 .drag-handle{width:28px;display:flex;align-items:center;justify-content:center;cursor:grab;color:var(--border2);font-size:12px;flex-shrink:0;transition:color .2s;border-right:1px solid var(--border);}
+
 .drag-handle:hover{color:var(--text3);}
+
 .drag-handle:active{cursor:grabbing;}
 
+
+
 .habit-check{width:48px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-right:1px solid var(--border);transition:background .2s;flex-shrink:0;}
+
 .habit-check:hover{background:rgba(57,255,20,.06);}
+
 .hbox{width:15px;height:15px;border:1px solid var(--border2);border-radius:1px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+
 .habit-item.done .hbox{background:var(--neon);border-color:var(--neon);}
+
 .hcheck{color:#111;font-size:9px;font-weight:700;opacity:0;transition:opacity .2s;}
+
 .habit-item.done .hcheck{opacity:1;}
+
 .habit-body{flex:1;padding:12px 14px;cursor:pointer;min-width:0;}
+
 .habit-name{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--text);transition:color .2s;display:block;}
+
 .habit-item.done .habit-name{color:var(--neon);}
+
 .habit-desc{font-size:10px;color:var(--text3);margin-top:2px;display:block;}
+
 .habit-actions{display:flex;opacity:0;transition:opacity .2s;flex-shrink:0;}
+
 .habit-item:hover .habit-actions{opacity:1;}
+
 .hab-btn{width:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:none;border:none;border-left:1px solid var(--border);color:var(--text3);font-size:11px;transition:all .2s;font-family:inherit;}
+
 .hab-btn:hover{color:var(--text);background:rgba(255,255,255,.03);}
+
 .hab-btn.del:hover{color:#c0392b;background:rgba(192,57,43,.08);}
 
+
+
 /* ADD FORM */
+
 .add-form{background:var(--surface);border:1px solid var(--border2);border-radius:2px;padding:14px;margin-bottom:5px;display:none;}
+
 .add-form.open{display:block;animation:fadeIn .2s;}
+
 .form-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+
 .form-input{flex:1;background:var(--bg);border:1px solid var(--border2);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:12px;padding:8px 12px;border-radius:2px;outline:none;transition:border-color .2s;min-width:80px;}
+
 .form-input:focus{border-color:var(--text2);}
+
 .form-input::placeholder{color:var(--text3);}
+
 .emoji-inp{width:44px;flex:none;text-align:center;font-size:15px;}
+
 .form-btn{padding:8px 14px;border-radius:2px;font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .2s;border:1px solid;}
+
 .form-btn.ok{background:var(--white);border-color:var(--white);color:#111;}
+
 .form-btn.ok:hover{background:#ccc;}
+
 .form-btn.no{background:transparent;border-color:var(--border2);color:var(--text3);}
+
 .form-btn.no:hover{border-color:var(--text3);color:var(--text);}
 
+
+
 /* RIGHT PANEL */
+
 .right-panel{display:flex;flex-direction:column;gap:16px;}
+
 .score-card{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:24px;}
+
 .card-label{font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--text3);margin-bottom:16px;}
+
 .score-big{font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:300;color:#fff;line-height:1;}
+
 .score-frac{font-size:9px;letter-spacing:.2em;color:var(--text3);text-transform:uppercase;margin-top:4px;display:block;}
+
 .pct-bar{height:2px;background:var(--border2);border-radius:1px;overflow:hidden;margin-top:14px;}
+
 .pct-bar-fill{height:100%;background:var(--neon);border-radius:1px;transition:width .6s cubic-bezier(.4,0,.2,1);}
+
 .mini-chart{margin-top:16px;}
+
 .mini-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+
 .mini-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
 .mini-bar-track{width:60px;height:3px;background:var(--border);border-radius:1px;overflow:hidden;flex-shrink:0;}
+
 .mini-bar-fill{height:100%;border-radius:1px;transition:width .5s;}
+
 .bar-chart{display:flex;flex-direction:column;gap:9px;}
+
 .bar-row{display:flex;align-items:center;gap:8px;}
+
 .bar-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;width:70px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
 .bar-track{flex:1;height:4px;background:var(--border);border-radius:1px;overflow:hidden;}
+
 .bar-fill{height:100%;border-radius:1px;background:var(--neon);transition:width .6s;}
+
 .bar-val{font-size:9px;color:var(--text3);width:28px;flex-shrink:0;text-align:right;}
+
 .mini-check{font-size:10px;width:14px;flex-shrink:0;text-align:right;}
 
+
+
 /* MONTHLY */
+
 .month-layout{display:grid;grid-template-columns:1fr 280px;gap:24px;}
+
 .cal-card{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:24px;}
+
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:14px;}
+
 .cal-head{text-align:center;font-size:9px;letter-spacing:.12em;color:var(--text3);text-transform:uppercase;padding:6px 0;}
+
 .cal-day{aspect-ratio:1;border-radius:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid transparent;transition:all .2s;}
+
 .cal-day .dn{font-size:10px;color:var(--text3);line-height:1;}
+
 .cal-day .dd{display:flex;gap:2px;margin-top:2px;}
+
 .cal-day .dot{width:3px;height:3px;border-radius:50%;}
+
 .cal-day.future .dn{color:var(--border);}
+
 .cal-day.empty{border:none;}
+
 .cal-day.nodata{border-color:var(--border);background:rgba(255,255,255,.01);}
+
 .cal-day.partial{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.04);}
+
 .cal-day.partial .dn{color:var(--text2);}
+
 .cal-day.full{border-color:rgba(57,255,20,.4);background:rgba(57,255,20,.07);}
+
 .cal-day.full .dn{color:var(--neon);}
+
 .cal-day.zero .dn{color:var(--border2);}
+
 .cal-day.today-cell{box-shadow:0 0 0 1px var(--white);}
+
 .cal-day.today-cell .dn{color:var(--white);}
+
 .cal-day[style*="cursor"]:hover{background:rgba(255,255,255,.06);}
 
+
+
 .stats-stack{display:flex;flex-direction:column;gap:14px;}
+
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:20px;}
+
 .stat-big{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:300;color:var(--white);line-height:1;margin-top:8px;}
+
 .stat-unit{font-size:16px;color:var(--text2);}
+
 .pie-svg{width:120px;height:120px;}
+
 .pie-legend{width:100%;margin-top:12px;}
+
 .legend-item{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:10px;}
+
 .legend-item:last-child{border-bottom:none;}
+
 .legend-l{display:flex;align-items:center;gap:7px;}
+
 .legend-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+
 .legend-name{color:var(--text2);text-transform:uppercase;letter-spacing:.08em;}
+
 .legend-val{color:var(--text3);font-size:9px;}
 
+
+
 .spark-card{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:20px;margin-top:14px;}
+
 .spark-svg{width:100%;height:60px;margin-top:12px;overflow:visible;}
 
+
+
 /* MODAL */
+
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px);}
+
 .modal-overlay.open{display:flex;}
+
 .modal{background:var(--surface2);border:1px solid var(--border2);border-radius:2px;padding:28px;width:340px;animation:fadeIn .2s;}
+
 .modal-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300;color:var(--white);margin-bottom:20px;}
+
 .modal-field{margin-bottom:14px;}
+
 .modal-lbl{display:block;font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--text3);margin-bottom:7px;}
+
 .modal-input{width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:12px;padding:9px 12px;border-radius:2px;outline:none;transition:border-color .2s;}
+
 .modal-input:focus{border-color:var(--text2);}
+
 .modal-select{width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:12px;padding:9px 12px;border-radius:2px;outline:none;}
+
 .modal-actions{display:flex;gap:8px;margin-top:20px;justify-content:flex-end;}
 
+
+
 @media(max-width:860px){
-  .app{grid-template-columns:1fr;}
-  .sidebar{position:static;height:auto;}
-  .main{padding:20px 14px;}
-  .today-grid{grid-template-columns:1fr;}
-  .month-layout{grid-template-columns:1fr;}
+
+  .app{grid-template-columns:1fr;}
+
+  .sidebar{position:static;height:auto;}
+
+  .main{padding:20px 14px;}
+
+  .today-grid{grid-template-columns:1fr;}
+
+  .month-layout{grid-template-columns:1fr;}
+
 }
+
 </style>
+
 </head>
+
 <body>
 
+
+
 <div id="loader">
-  <div class="loader-logo">⬡ HABIT TRACKER</div>
-  <div class="loader-bar"><div class="loader-fill"></div></div>
-  <div class="loader-sub">connecting to cloud...</div>
+
+  <div class="loader-logo">⬡ HABIT TRACKER</div>
+
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+
+  <div class="loader-sub">connecting to cloud...</div>
+
 </div>
+
+
 
 <!-- PROFILE SCREEN -->
+
 <div id="profileScreen">
-  <div class="profile-card">
-    <div class="loader-logo" style="margin-bottom:8px">⬡ HABIT TRACKER</div>
-    <div class="logo-sub" style="text-align:center;margin-bottom:32px">choose your profile</div>
-    <div id="profileList"></div>
-  </div>
 
-  <!-- Bottom right menu: + and - -->
-  <div style="position:fixed;bottom:32px;right:32px;display:flex;flex-direction:column;align-items:center;gap:16px;">
-    <div id="profileMinusBtn" onclick="enterDeleteMode()" style="display:none;font-size:28px;color:var(--text3);cursor:pointer;line-height:1;user-select:none;transition:color .2s;">−</div>
-    <div id="profileFab" onclick="toggleNewProfileForm()" style="font-size:28px;color:var(--white);cursor:pointer;line-height:1;user-select:none;transition:color .2s;">+</div>
-  </div>
+  <div class="profile-card">
 
-  <!-- New profile form -->
-  <div id="newProfileForm" style="position:fixed;bottom:90px;right:32px;background:var(--surface2);border:1px solid var(--border2);border-radius:2px;padding:16px;display:none;gap:8px;flex-direction:column;min-width:220px;">
-    <input class="modal-input" id="newProfileName" placeholder="Profile name..." maxlength="20" style="width:100%">
-    <button class="form-btn ok" onclick="createProfile()" style="width:100%">Create</button>
-  </div>
+    <div class="loader-logo" style="margin-bottom:8px">⬡ HABIT TRACKER</div>
+
+    <div class="logo-sub" style="text-align:center;margin-bottom:32px">choose your profile</div>
+
+    <div id="profileList"></div>
+
+  </div>
+
+
+
+  <!-- Bottom right menu: + and - -->
+
+  <div style="position:fixed;bottom:32px;right:32px;display:flex;flex-direction:column;align-items:center;gap:16px;">
+
+    <div id="profileMinusBtn" onclick="enterDeleteMode()" style="display:none;font-size:28px;color:var(--text3);cursor:pointer;line-height:1;user-select:none;transition:color .2s;">−</div>
+
+    <div id="profileFab" onclick="toggleNewProfileForm()" style="font-size:28px;color:var(--white);cursor:pointer;line-height:1;user-select:none;transition:color .2s;">+</div>
+
+  </div>
+
+
+
+  <!-- New profile form -->
+
+  <div id="newProfileForm" style="position:fixed;bottom:90px;right:32px;background:var(--surface2);border:1px solid var(--border2);border-radius:2px;padding:16px;display:none;gap:8px;flex-direction:column;min-width:220px;">
+
+    <input class="modal-input" id="newProfileName" placeholder="Profile name..." maxlength="20" style="width:100%">
+
+    <button class="form-btn ok" onclick="createProfile()" style="width:100%">Create</button>
+
+  </div>
+
 </div>
+
+
 
 <div class="app" id="mainApp" style="display:none">
-  <aside class="sidebar">
-    <div class="logo-area">
-      <span class="logo-main">⬡ HABIT TRACKER <span class="sync-dot" id="syncDot"></span></span>
-      <span class="logo-sub">discipline &amp; precision</span>
-    </div>
-    <nav class="nav">
-      <div class="nav-item active" onclick="switchPage('today',this)">◈ &nbsp; Today</div>
-      <div class="nav-item" onclick="switchPage('monthly',this)">◫ &nbsp; Monthly</div>
-    </nav>
-    <div class="sidebar-date">
-      <div class="sidebar-day" id="sidebarDay"></div>
-      <div class="sidebar-rest" id="sidebarRest"></div>
-    </div>
-    <div class="profile-switch" onclick="switchProfile()">
-      <span id="currentProfileName">—</span>
-      <span class="profile-switch-arrow">⇄</span>
-    </div>
-    <div class="profile-switch" id="restoreBtn" onclick="restoreLegacyLogs()" style="border-top:none;display:none">
-      <span>Restore old history</span>
-      <span class="profile-switch-arrow">↺</span>
-    </div>
-  </aside>
 
-  <main class="main">
+  <aside class="sidebar">
 
-    <!-- TODAY -->
-    <section class="page active" id="page-today">
-      <div class="page-header">
-        <div class="page-title">Today's <span>Habits</span></div>
-      </div>
-      <div class="today-grid">
-        <div>
-          <!-- MORNING -->
-          <div class="category">
-            <div class="cat-header">
-              <div class="cat-title">MORNING <span class="cat-count" id="count-morning"></span></div>
-              <button class="add-btn" onclick="openAddModal('morning')">+ Add</button>
-            </div>
-            <div class="habit-list" id="list-morning" data-cat="morning"></div>
-          </div>
-          <!-- NIGHT -->
-          <div class="category">
-            <div class="cat-header">
-              <div class="cat-title">NIGHT <span class="cat-count" id="count-night"></span></div>
-              <button class="add-btn" onclick="openAddModal('night')">+ Add</button>
-            </div>
-            <div class="habit-list" id="list-night" data-cat="night"></div>
-          </div>
-          <!-- OTHER -->
-          <div class="category">
-            <div class="cat-header">
-              <div class="cat-title">OTHER <span class="cat-count" id="count-other"></span></div>
-              <button class="add-btn" onclick="openAddModal('other')">+ Add</button>
-            </div>
-            <div class="habit-list" id="list-other" data-cat="other"></div>
-          </div>
-          <!-- BIRTHDAYS — shown only on matching day -->
-          <div class="category" id="birthdaySection" style="display:none">
-            <div class="cat-header">
-              <div class="cat-title" style="color:#fff;letter-spacing:.3em">BIRTHDAY</div>
-            </div>
-            <div id="birthdayList"></div>
-          </div>
-        </div>
+    <div class="logo-area">
 
-        <!-- RIGHT PANEL -->
-        <div class="right-panel">
-          <div class="score-card">
-            <div class="card-label">Today's score</div>
-            <div class="score-big" id="todayPct">0%</div>
-            <span class="score-frac" id="todayFraction">0 / 0 habits</span>
-            <div class="pct-bar"><div class="pct-bar-fill" id="todayBar" style="width:0%"></div></div>
-            <div class="mini-chart" id="todayMiniChart"></div>
-          </div>
-        </div>
-      </div>
-    </section>
+      <span class="logo-main">⬡ HABIT TRACKER <span class="sync-dot" id="syncDot"></span></span>
 
-    <!-- MONTHLY -->
-    <section class="page" id="page-monthly">
-      <div class="page-header">
-        <div class="page-title">Monthly <span>Overview</span></div>
-      </div>
-      <div class="month-layout">
-        <div>
-          <div class="cal-card">
-            <div class="card-label" id="calLabel"></div>
-            <div class="cal-grid" id="calGrid"></div>
-          </div>
-          <div class="spark-card">
-            <div class="card-label">Last 30 days</div>
-            <svg class="spark-svg" id="sparkSvg" preserveAspectRatio="none"></svg>
-          </div>
-        </div>
-        <div class="stats-stack">
-          <div class="stat-card">
-            <div class="card-label">Month completion</div>
-            <div style="display:flex;flex-direction:column;align-items:center;margin-top:8px">
-              <svg class="pie-svg" viewBox="0 0 120 120" id="monthPie"></svg>
-              <div class="pie-legend" id="monthPieLegend"></div>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="card-label">Month %</div>
-            <div class="stat-big" id="monthPct">0<span class="stat-unit">%</span></div>
-            <div class="pct-bar" style="margin-top:10px"><div class="pct-bar-fill" id="monthBar" style="width:0%"></div></div>
-          </div>
-          <div class="stat-card">
-            <div class="card-label">Current streak</div>
-            <div class="stat-big" id="streakNum">0<span class="stat-unit"> days</span></div>
-          </div>
-          <div class="stat-card">
-            <div class="card-label">Per-habit completion</div>
-            <div class="bar-chart" id="habitBars" style="margin-top:14px"></div>
-          </div>
-        </div>
-      </div>
-    </section>
+      <span class="logo-sub">discipline &amp; precision</span>
 
-  </main>
+    </div>
+
+    <nav class="nav">
+
+      <div class="nav-item active" onclick="switchPage('today',this)">◈ &nbsp; Today</div>
+
+      <div class="nav-item" onclick="switchPage('monthly',this)">◫ &nbsp; Monthly</div>
+
+    </nav>
+
+    <div class="sidebar-date">
+
+      <div class="sidebar-day" id="sidebarDay"></div>
+
+      <div class="sidebar-rest" id="sidebarRest"></div>
+
+    </div>
+
+    <div class="profile-switch" onclick="switchProfile()">
+
+      <span id="currentProfileName">—</span>
+
+      <span class="profile-switch-arrow">⇄</span>
+
+    </div>
+
+    <div class="profile-switch" id="restoreBtn" onclick="restoreLegacyLogs()" style="border-top:none;display:none">
+
+      <span>Restore old history</span>
+
+      <span class="profile-switch-arrow">↺</span>
+
+    </div>
+
+  </aside>
+
+
+
+  <main class="main">
+
+
+
+    <!-- TODAY -->
+
+    <section class="page active" id="page-today">
+
+      <div class="page-header">
+
+        <div class="page-title">Today's <span>Habits</span></div>
+
+      </div>
+
+      <div class="today-grid">
+
+        <div>
+
+          <!-- MORNING -->
+
+          <div class="category">
+
+            <div class="cat-header">
+
+              <div class="cat-title">MORNING <span class="cat-count" id="count-morning"></span></div>
+
+              <button class="add-btn" onclick="openAddModal('morning')">+ Add</button>
+
+            </div>
+
+            <div class="habit-list" id="list-morning" data-cat="morning"></div>
+
+          </div>
+
+          <!-- NIGHT -->
+
+          <div class="category">
+
+            <div class="cat-header">
+
+              <div class="cat-title">NIGHT <span class="cat-count" id="count-night"></span></div>
+
+              <button class="add-btn" onclick="openAddModal('night')">+ Add</button>
+
+            </div>
+
+            <div class="habit-list" id="list-night" data-cat="night"></div>
+
+          </div>
+
+          <!-- OTHER -->
+
+          <div class="category">
+
+            <div class="cat-header">
+
+              <div class="cat-title">OTHER <span class="cat-count" id="count-other"></span></div>
+
+              <button class="add-btn" onclick="openAddModal('other')">+ Add</button>
+
+            </div>
+
+            <div class="habit-list" id="list-other" data-cat="other"></div>
+
+          </div>
+
+          <!-- BIRTHDAYS — shown only on matching day -->
+
+          <div class="category" id="birthdaySection" style="display:none">
+
+            <div class="cat-header">
+
+              <div class="cat-title" style="color:#fff;letter-spacing:.3em">BIRTHDAY</div>
+
+            </div>
+
+            <div id="birthdayList"></div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- RIGHT PANEL -->
+
+        <div class="right-panel">
+
+          <div class="score-card">
+
+            <div class="card-label">Today's score</div>
+
+            <div class="score-big" id="todayPct">0%</div>
+
+            <span class="score-frac" id="todayFraction">0 / 0 habits</span>
+
+            <div class="pct-bar"><div class="pct-bar-fill" id="todayBar" style="width:0%"></div></div>
+
+            <div class="mini-chart" id="todayMiniChart"></div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- MONTHLY -->
+
+    <section class="page" id="page-monthly">
+
+      <div class="page-header">
+
+        <div class="page-title">Monthly <span>Overview</span></div>
+
+      </div>
+
+      <div class="month-layout">
+
+        <div>
+
+          <div class="cal-card">
+
+            <div class="card-label" id="calLabel"></div>
+
+            <div class="cal-grid" id="calGrid"></div>
+
+          </div>
+
+          <div class="spark-card">
+
+            <div class="card-label">Last 30 days</div>
+
+            <svg class="spark-svg" id="sparkSvg" preserveAspectRatio="none"></svg>
+
+          </div>
+
+        </div>
+
+        <div class="stats-stack">
+
+          <div class="stat-card">
+
+            <div class="card-label">Month completion</div>
+
+            <div style="display:flex;flex-direction:column;align-items:center;margin-top:8px">
+
+              <svg class="pie-svg" viewBox="0 0 120 120" id="monthPie"></svg>
+
+              <div class="pie-legend" id="monthPieLegend"></div>
+
+            </div>
+
+          </div>
+
+          <div class="stat-card">
+
+            <div class="card-label">Month %</div>
+
+            <div class="stat-big" id="monthPct">0<span class="stat-unit">%</span></div>
+
+            <div class="pct-bar" style="margin-top:10px"><div class="pct-bar-fill" id="monthBar" style="width:0%"></div></div>
+
+          </div>
+
+          <div class="stat-card">
+
+            <div class="card-label">Current streak</div>
+
+            <div class="stat-big" id="streakNum">0<span class="stat-unit"> days</span></div>
+
+          </div>
+
+          <div class="stat-card">
+
+            <div class="card-label">Per-habit completion</div>
+
+            <div class="bar-chart" id="habitBars" style="margin-top:14px"></div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+  </main>
+
 </div>
+
+
 
 <!-- ADD MODAL -->
+
 <div class="modal-overlay" id="addModal">
-  <div class="modal">
-    <div class="modal-title">New Habit</div>
-    <div class="modal-field">
-      <label class="modal-lbl">Category</label>
-      <select class="modal-select" id="addCat">
-        <option value="morning">Morning</option>
-        <option value="night">Night</option>
-        <option value="other">Other</option>
-      </select>
-    </div>
-    <div class="modal-field">
-      <label class="modal-lbl">Name</label>
-      <input class="modal-input" id="addName" maxlength="40" placeholder="Habit name...">
-    </div>
-    <div class="modal-field">
-      <label class="modal-lbl">Note (optional)</label>
-      <input class="modal-input" id="addDesc" maxlength="50" placeholder="Short description...">
-    </div>
-    <div class="modal-actions">
-      <button class="form-btn no" onclick="closeAddModal()">Cancel</button>
-      <button class="form-btn ok" onclick="confirmAdd()">Add</button>
-    </div>
-  </div>
+
+  <div class="modal">
+
+    <div class="modal-title">New Habit</div>
+
+    <div class="modal-field">
+
+      <label class="modal-lbl">Category</label>
+
+      <select class="modal-select" id="addCat">
+
+        <option value="morning">Morning</option>
+
+        <option value="night">Night</option>
+
+        <option value="other">Other</option>
+
+      </select>
+
+    </div>
+
+    <div class="modal-field">
+
+      <label class="modal-lbl">Name</label>
+
+      <input class="modal-input" id="addName" maxlength="40" placeholder="Habit name...">
+
+    </div>
+
+    <div class="modal-field">
+
+      <label class="modal-lbl">Note (optional)</label>
+
+      <input class="modal-input" id="addDesc" maxlength="50" placeholder="Short description...">
+
+    </div>
+
+    <div class="modal-actions">
+
+      <button class="form-btn no" onclick="closeAddModal()">Cancel</button>
+
+      <button class="form-btn ok" onclick="confirmAdd()">Add</button>
+
+    </div>
+
+  </div>
+
 </div>
+
+
 
 <!-- EDIT MODAL -->
+
 <div class="modal-overlay" id="editModal">
-  <div class="modal">
-    <div class="modal-title">Edit Habit</div>
-    <div class="modal-field">
-      <label class="modal-lbl">Category</label>
-      <select class="modal-select" id="editCat">
-        <option value="morning">Morning</option>
-        <option value="night">Night</option>
-        <option value="other">Other</option>
-      </select>
-    </div>
-    <div class="modal-field">
-      <label class="modal-lbl">Name</label>
-      <input class="modal-input" id="editName" maxlength="40">
-    </div>
-    <div class="modal-field">
-      <label class="modal-lbl">Note</label>
-      <input class="modal-input" id="editDesc" maxlength="50">
-    </div>
-    <div class="modal-actions">
-      <button class="form-btn no" onclick="closeEditModal()">Cancel</button>
-      <button class="form-btn ok" onclick="saveEdit()">Save</button>
-    </div>
-  </div>
+
+  <div class="modal">
+
+    <div class="modal-title">Edit Habit</div>
+
+    <div class="modal-field">
+
+      <label class="modal-lbl">Category</label>
+
+      <select class="modal-select" id="editCat">
+
+        <option value="morning">Morning</option>
+
+        <option value="night">Night</option>
+
+        <option value="other">Other</option>
+
+      </select>
+
+    </div>
+
+    <div class="modal-field">
+
+      <label class="modal-lbl">Name</label>
+
+      <input class="modal-input" id="editName" maxlength="40">
+
+    </div>
+
+    <div class="modal-field">
+
+      <label class="modal-lbl">Note</label>
+
+      <input class="modal-input" id="editDesc" maxlength="50">
+
+    </div>
+
+    <div class="modal-actions">
+
+      <button class="form-btn no" onclick="closeEditModal()">Cancel</button>
+
+      <button class="form-btn ok" onclick="saveEdit()">Save</button>
+
+    </div>
+
+  </div>
+
 </div>
+
+
 
 <!-- DAY HISTORY MODAL -->
+
 <div class="modal-overlay" id="dayModal">
-  <div class="modal">
-    <div class="modal-title" id="dayModalTitle">—</div>
-    <div style="font-size:9px;letter-spacing:.2em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Tap to toggle</div>
-    <div id="dayModalList"></div>
-    <div class="modal-actions"><button class="form-btn no" onclick="closeDayModal()">Close</button></div>
-  </div>
+
+  <div class="modal">
+
+    <div class="modal-title" id="dayModalTitle">—</div>
+
+    <div style="font-size:9px;letter-spacing:.2em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Tap to toggle</div>
+
+    <div id="dayModalList"></div>
+
+    <div class="modal-actions"><button class="form-btn no" onclick="closeDayModal()">Close</button></div>
+
+  </div>
+
 </div>
 
+
+
 <!-- Firebase -->
+
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
 import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
+
+
 const firebaseConfig = {
-  apiKey: "AIzaSyAY_pgwygy35AtpB-Pos3ZRzqQIIK0vD50",
-  authDomain: "habit-tracker-f4111.firebaseapp.com",
-  databaseURL: "https://habit-tracker-f4111-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "habit-tracker-f4111",
-  storageBucket: "habit-tracker-f4111.firebasestorage.app",
-  messagingSenderId: "297813265108",
-  appId: "1:297813265108:web:0e3ce4657d35ba38980941"
+
+  apiKey: "AIzaSyAY_pgwygy35AtpB-Pos3ZRzqQIIK0vD50",
+
+  authDomain: "habit-tracker-f4111.firebaseapp.com",
+
+  databaseURL: "https://habit-tracker-f4111-default-rtdb.europe-west1.firebasedatabase.app",
+
+  projectId: "habit-tracker-f4111",
+
+  storageBucket: "habit-tracker-f4111.firebasestorage.app",
+
+  messagingSenderId: "297813265108",
+
+  appId: "1:297813265108:web:0e3ce4657d35ba38980941"
+
 };
 
+
+
 const fbApp = initializeApp(firebaseConfig);
+
 const db = getDatabase(fbApp);
+
 window._fbSet = async (path, data) => { await set(ref(db, path), data); };
+
 window._fbGet = async (path) => { const s = await get(ref(db, path)); return s.exists() ? s.val() : null; };
+
 window.addEventListener('load', () => initApp());
+
 </script>
 
+
+
 <script>
+
 // ── STATE ──
+
 const DEFAULTS = [
-  {id:'h1', cat:'morning', name:'Wake Up Early', desc:''},
-  {id:'h2', cat:'morning', name:'Raed book',     desc:''},
-  {id:'h3', cat:'morning', name:'Gym',     desc:''},
+
+  {id:'h1', cat:'morning', name:'Wake Up Early', desc:''},
+
+  {id:'h2', cat:'morning', name:'Raed book',     desc:''},
+
+  {id:'h3', cat:'morning', name:'Gym',     desc:''},
+
 ];
+
 const CATS = ['morning','night','other'];
 
-  
+
+
+  
+
 const BIRTHDAYS = [
-  { id:'bday1', name:'Κεχαγίας', month:7, day:27 },
-  { id:'bday1', name:'Κατσούρας', month:10, day:27 },
-  { id:'bday1', name:'Θάνος', month:8, day:18 },
-  { id:'bday1', name:'Γιώργος', month:4, day:11 },
-  { id:'bday1', name:'Φίλιππος', month:5, day:12 },
-  { id:'bday1', name:'Αγγελής', month:6, day:30 },
-  { id:'bday1', name:'Άγγελος', month:6, day:30 },
-  { id:'bday1', name:'Ορεστ', month:6, day:30 },
-  { id:'bday1', name:'Εύα', month:5, day:12 },
-  { id:'bday1', name:'Πατέρας', month:5, day:9 },
-  { id:'bday1', name:'Μάνα', month:4, day:29 },
-  { id:'bday1', name:'Αγαπούλα', month:4, day:5 },
+
+  { id:'bday1', name:'Κεχαγίας', month:7, day:27 },
+
+  { id:'bday1', name:'Κατσούρας', month:10, day:27 },
+
+  { id:'bday1', name:'Θάνος', month:8, day:18 },
+
+  { id:'bday1', name:'Γιώργος', month:4, day:11 },
+
+  { id:'bday1', name:'Φίλιππος', month:5, day:12 },
+
+  { id:'bday1', name:'Αγγελής', month:6, day:30 },
+
+  { id:'bday1', name:'Άγγελος', month:6, day:30 },
+
+  { id:'bday1', name:'Ορεστ', month:6, day:30 },
+
+  { id:'bday1', name:'Εύα', month:5, day:12 },
+
+  { id:'bday1', name:'Πατέρας', month:5, day:9 },
+
+  { id:'bday1', name:'Μάνα', month:4, day:29 },
+
+  { id:'bday1', name:'Αγαπούλα', month:4, day:5 },
+
 ];
 
+
+
 function isBirthday(b) {
-  const now = new Date();
-  return now.getMonth()+1 === b.month && now.getDate() === b.day;
+
+  const now = new Date();
+
+  return now.getMonth()+1 === b.month && now.getDate() === b.day;
+
 }
+
+
 
 async function renderBirthdays(log) {
-  const section = document.getElementById('birthdaySection');
-  const list = document.getElementById('birthdayList');
-  const todays = BIRTHDAYS.filter(isBirthday);
-  if (!todays.length) { section.style.display='none'; return; }
-  section.style.display='block';
-  list.innerHTML='';
-  todays.forEach(b => {
-    const done = !!log['bday_'+b.id];
-    const el = document.createElement('div');
-    el.className = 'habit-item'+(done?' done':'');
-    el.innerHTML = `
-      <div class="habit-check" onclick="toggleBirthday('${b.id}')">
-        <div class="hbox"><span class="hcheck">✓</span></div>
-      </div>
-      <div class="habit-body" onclick="toggleBirthday('${b.id}')">
-        <span class="habit-name">🎂 ${b.name}</span>
-        <span class="habit-desc">Today is their birthday!</span>
-      </div>`;
-    list.appendChild(el);
-  });
+
+  const section = document.getElementById('birthdaySection');
+
+  const list = document.getElementById('birthdayList');
+
+  const todays = BIRTHDAYS.filter(isBirthday);
+
+  if (!todays.length) { section.style.display='none'; return; }
+
+  section.style.display='block';
+
+  list.innerHTML='';
+
+  todays.forEach(b => {
+
+    const done = !!log['bday_'+b.id];
+
+    const el = document.createElement('div');
+
+    el.className = 'habit-item'+(done?' done':'');
+
+    el.innerHTML = `
+
+      <div class="habit-check" onclick="toggleBirthday('${b.id}')">
+
+        <div class="hbox"><span class="hcheck">✓</span></div>
+
+      </div>
+
+      <div class="habit-body" onclick="toggleBirthday('${b.id}')">
+
+        <span class="habit-name">🎂 ${b.name}</span>
+
+        <span class="habit-desc">Today is their birthday!</span>
+
+      </div>`;
+
+    list.appendChild(el);
+
+  });
+
 }
+
+
 
 async function toggleBirthday(id) {
-  const log = await fbGetLog(dateKey());
-  log['bday_'+id] = !log['bday_'+id];
-  if (!log['bday_'+id]) delete log['bday_'+id];
-  await fbSaveLog(dateKey(), log);
-  renderToday();
+
+  const log = await fbGetLog(dateKey());
+
+  log['bday_'+id] = !log['bday_'+id];
+
+  if (!log['bday_'+id]) delete log['bday_'+id];
+
+  await fbSaveLog(dateKey(), log);
+
+  renderToday();
+
 }
+
 let habits = [];
+
 let logsCache = {};
+
 let editingId = null;
+
 let currentProfile = null;
 
+
+
 function dateKey(d) {
-  d = d || new Date();
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+
+  d = d || new Date();
+
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+
 }
+
 function uidGen() { return 'h'+Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
+
 function syncState(s) { const d=document.getElementById('syncDot'); if(d) d.className='sync-dot '+s; }
 
+
+
 // Sanitize a name into a safe Firebase key
+
 function sanitizeKey(name) {
-  return name.trim().toLowerCase().replace(/[.#$\[\]\/\s]+/g, '_').slice(0, 30);
+
+  return name.trim().toLowerCase().replace(/[.#$\[\]\/\s]+/g, '_').slice(0, 30);
+
 }
+
+
 
 // ── FIREBASE ──
+
 async function fbSaveHabits(arr) {
-  syncState('syncing');
-  try { await window._fbSet('users/'+currentProfile+'/habits', arr); syncState('synced'); }
-  catch(e) { syncState('error'); }
+
+  syncState('syncing');
+
+  try { await window._fbSet('users/'+currentProfile+'/habits', arr); syncState('synced'); }
+
+  catch(e) { syncState('error'); }
+
 }
+
 async function fbSaveLog(key, obj) {
-  syncState('syncing');
-  try { await window._fbSet('users/'+currentProfile+'/logs/'+key, obj); logsCache[key]=obj; syncState('synced'); }
-  catch(e) { syncState('error'); }
+
+  syncState('syncing');
+
+  try { await window._fbSet('users/'+currentProfile+'/logs/'+key, obj); logsCache[key]=obj; syncState('synced'); }
+
+  catch(e) { syncState('error'); }
+
 }
+
 async function fbGetLog(key) {
-  if (logsCache[key]!==undefined) return logsCache[key];
-  try { const v=await window._fbGet('users/'+currentProfile+'/logs/'+key); logsCache[key]=v||{}; return logsCache[key]; }
-  catch(e) { return {}; }
+
+  if (logsCache[key]!==undefined) return logsCache[key];
+
+  try { const v=await window._fbGet('users/'+currentProfile+'/logs/'+key); logsCache[key]=v||{}; return logsCache[key]; }
+
+  catch(e) { return {}; }
+
 }
+
+
 
 // ── PROFILES ──
+
 async function getProfileList() {
-  try {
-    const v = await window._fbGet('profiles');
-    return v || {};
-  } catch(e) { return {}; }
+
+  try {
+
+    const v = await window._fbGet('profiles');
+
+    return v || {};
+
+  } catch(e) { return {}; }
+
 }
+
+
 
 async function saveProfileList(list) {
-  try { await window._fbSet('profiles', list); } catch(e) {}
+
+  try { await window._fbSet('profiles', list); } catch(e) {}
+
 }
+
+
 
 async function showProfileScreen() {
-  const loader = document.getElementById('loader');
-  if (loader) {
-    loader.classList.add('hide');
-    setTimeout(()=>loader.remove(), 400);
-  }
 
-  const list = await getProfileList();
-  const listEl = document.getElementById('profileList');
-  listEl.innerHTML = '';
-  const keys = Object.keys(list);
+  const loader = document.getElementById('loader');
 
-  if (!keys.length) {
-    listEl.innerHTML = `<div class="profile-empty">No profiles yet — tap + to create one</div>`;
-  } else {
-    keys.forEach(key => {
-      const displayName = list[key];
-      const row = document.createElement('div');
-      row.className = 'profile-list-item';
-      row.style.justifyContent = 'center';
-      row.innerHTML = deleteMode
-        ? `<span class="profile-list-del" style="color:#c0392b;font-size:18px;margin-right:12px">−</span>
-           <span class="profile-list-name">${displayName}</span>`
-        : `<span class="profile-list-name">${displayName}</span>`;
-      if (deleteMode) {
-        row.querySelector('.profile-list-del').addEventListener('click', e => {
-          e.stopPropagation();
-          deleteProfile(key, displayName);
-        });
-      } else {
-        row.addEventListener('click', () => selectProfile(key));
-      }
-      listEl.appendChild(row);
-    });
-  }
+  if (loader) {
 
-  // Show/hide − button
-  const minusBtn = document.getElementById('profileMinusBtn');
-  if (minusBtn) minusBtn.style.display = keys.length ? 'block' : 'none';
+    loader.classList.add('hide');
 
-  document.getElementById('profileScreen').classList.add('show');
-  document.getElementById('newProfileName').focus();
+    setTimeout(()=>loader.remove(), 400);
+
+  }
+
+
+
+  const list = await getProfileList();
+
+  const listEl = document.getElementById('profileList');
+
+  listEl.innerHTML = '';
+
+  const keys = Object.keys(list);
+
+
+
+  if (!keys.length) {
+
+    listEl.innerHTML = `<div class="profile-empty">No profiles yet — tap + to create one</div>`;
+
+  } else {
+
+    keys.forEach(key => {
+
+      const displayName = list[key];
+
+      const row = document.createElement('div');
+
+      row.className = 'profile-list-item';
+
+      row.style.justifyContent = 'center';
+
+      row.innerHTML = deleteMode
+
+        ? `<span class="profile-list-del" style="color:#c0392b;font-size:18px;margin-right:12px">−</span>
+
+           <span class="profile-list-name">${displayName}</span>`
+
+        : `<span class="profile-list-name">${displayName}</span>`;
+
+      if (deleteMode) {
+
+        row.querySelector('.profile-list-del').addEventListener('click', e => {
+
+          e.stopPropagation();
+
+          deleteProfile(key, displayName);
+
+        });
+
+      } else {
+
+        row.addEventListener('click', () => selectProfile(key));
+
+      }
+
+      listEl.appendChild(row);
+
+    });
+
+  }
+
+
+
+  // Show/hide − button
+
+  const minusBtn = document.getElementById('profileMinusBtn');
+
+  if (minusBtn) minusBtn.style.display = keys.length ? 'block' : 'none';
+
+
+
+  document.getElementById('profileScreen').classList.add('show');
+
+  document.getElementById('newProfileName').focus();
+
 }
+
+
 
 async function createProfile() {
-  const input = document.getElementById('newProfileName');
-  const name = input.value.trim();
-  if (!name) return;
-  const key = sanitizeKey(name);
-  if (!key) return;
-  const list = await getProfileList();
-  list[key] = name;
-  await saveProfileList(list);
-  input.value = '';
-  selectProfile(key, name);
+
+  const input = document.getElementById('newProfileName');
+
+  const name = input.value.trim();
+
+  if (!name) return;
+
+  const key = sanitizeKey(name);
+
+  if (!key) return;
+
+  const list = await getProfileList();
+
+  list[key] = name;
+
+  await saveProfileList(list);
+
+  input.value = '';
+
+  selectProfile(key, name);
+
 }
+
+
 
 let deleteMode = false;
 
+
+
 function toggleNewProfileForm() {
-  if (deleteMode) {
-    deleteMode = false;
-    showProfileScreen();
-    return;
-  }
-  const form = document.getElementById('newProfileForm');
-  const isOpen = form.style.display === 'flex';
-  form.style.display = isOpen ? 'none' : 'flex';
-  if (!isOpen) document.getElementById('newProfileName').focus();
+
+  if (deleteMode) {
+
+    deleteMode = false;
+
+    showProfileScreen();
+
+    return;
+
+  }
+
+  const form = document.getElementById('newProfileForm');
+
+  const isOpen = form.style.display === 'flex';
+
+  form.style.display = isOpen ? 'none' : 'flex';
+
+  if (!isOpen) document.getElementById('newProfileName').focus();
+
 }
+
+
 
 function enterDeleteMode() {
-  deleteMode = true;
-  showProfileScreen();
+
+  deleteMode = true;
+
+  showProfileScreen();
+
 }
+
+
 
 document.getElementById('newProfileName').addEventListener('keydown', e => {
-  if (e.key === 'Enter') createProfile();
-  if (e.key === 'Escape') {
-    document.getElementById('newProfileForm').style.display = 'none';
-  }
+
+  if (e.key === 'Enter') createProfile();
+
+  if (e.key === 'Escape') {
+
+    document.getElementById('newProfileForm').style.display = 'none';
+
+  }
+
 });
 
+
+
 async function deleteProfile(key, displayName) {
-  if (!confirm('Remove profile "'+displayName+'"?')) return;
-  const list = await getProfileList();
-  delete list[key];
-  await saveProfileList(list);
-  try { await window._fbSet('users/'+key, null); } catch(e) {}
-  deleteMode = false;
-  showProfileScreen();
+
+  if (!confirm('Remove profile "'+displayName+'"?')) return;
+
+  const list = await getProfileList();
+
+  delete list[key];
+
+  await saveProfileList(list);
+
+  try { await window._fbSet('users/'+key, null); } catch(e) {}
+
+  deleteMode = false;
+
+  showProfileScreen();
+
 }
+
+
 
 async function selectProfile(key, displayName) {
-  currentProfile = key;
-  // get display name if not passed
-  if (!displayName) {
-    const list = await getProfileList();
-    displayName = list[key] || key;
-  }
-  document.getElementById('currentProfileName').textContent = displayName;
-  document.getElementById('profileScreen').classList.remove('show');
-  document.getElementById('mainApp').style.display = 'grid';
 
-  // Restore button only visible for the vasilis profile
-  const restoreBtn = document.getElementById('restoreBtn');
-  if (restoreBtn) restoreBtn.style.display = (key === 'vasilis') ? 'flex' : 'none';
+  currentProfile = key;
 
-  // reset state and load this profile's data
-  habits = [];
-  logsCache = {};
-  await loadProfileData();
+  // get display name if not passed
+
+  if (!displayName) {
+
+    const list = await getProfileList();
+
+    displayName = list[key] || key;
+
+  }
+
+  document.getElementById('currentProfileName').textContent = displayName;
+
+  document.getElementById('profileScreen').classList.remove('show');
+
+  document.getElementById('mainApp').style.display = 'grid';
+
+
+
+  // Restore button only visible for the vasilis profile
+
+  const restoreBtn = document.getElementById('restoreBtn');
+
+  if (restoreBtn) restoreBtn.style.display = (key === 'vasilis') ? 'flex' : 'none';
+
+
+
+  // reset state and load this profile's data
+
+  habits = [];
+
+  logsCache = {};
+
+  await loadProfileData();
+
 }
+
+
 
 function switchProfile() {
-  document.getElementById('mainApp').style.display = 'none';
-  showProfileScreen();
+
+  document.getElementById('mainApp').style.display = 'none';
+
+  showProfileScreen();
+
 }
+
+
 
 async function restoreLegacyLogs() {
-  if (!confirm('Pull old habits AND history (from before profiles) into "'+document.getElementById('currentProfileName').textContent+'"? This will REPLACE this profile\'s current habits with the old ones.')) return;
-  syncState('syncing');
-  try {
-    let count = 0;
 
-    // Restore habits first
-    const legacyHabits = await window._fbGet('habits');
-    if (legacyHabits) {
-      habits = legacyHabits.map(h => ({...h, cat: h.cat||'morning'}));
-      await fbSaveHabits(habits);
-    }
+  if (!confirm('Pull old habits AND history (from before profiles) into "'+document.getElementById('currentProfileName').textContent+'"? This will REPLACE this profile\'s current habits with the old ones.')) return;
 
-    // Restore logs
-    const legacyLogs = await window._fbGet('logs');
-    if (legacyLogs) {
-      for (const k of Object.keys(legacyLogs)) {
-        await window._fbSet('users/'+currentProfile+'/logs/'+k, legacyLogs[k]);
-        logsCache[k] = legacyLogs[k];
-        count++;
-      }
-    }
+  syncState('syncing');
 
-    if (!legacyHabits && !legacyLogs) {
-      alert('No old data found at the root level.');
-      syncState('synced');
-      return;
-    }
+  try {
 
-    syncState('synced');
-    alert('Restored habits + '+count+' day(s) of history!');
-    renderToday();
-    if (document.getElementById('page-monthly').classList.contains('active')) renderMonthly();
-  } catch(e) {
-    syncState('error');
-    alert('Error restoring history: '+e.message);
-  }
+    let count = 0;
+
+
+
+    // Restore habits first
+
+    const legacyHabits = await window._fbGet('habits');
+
+    if (legacyHabits) {
+
+      habits = legacyHabits.map(h => ({...h, cat: h.cat||'morning'}));
+
+      await fbSaveHabits(habits);
+
+    }
+
+
+
+    // Restore logs
+
+    const legacyLogs = await window._fbGet('logs');
+
+    if (legacyLogs) {
+
+      for (const k of Object.keys(legacyLogs)) {
+
+        await window._fbSet('users/'+currentProfile+'/logs/'+k, legacyLogs[k]);
+
+        logsCache[k] = legacyLogs[k];
+
+        count++;
+
+      }
+
+    }
+
+
+
+    if (!legacyHabits && !legacyLogs) {
+
+      alert('No old data found at the root level.');
+
+      syncState('synced');
+
+      return;
+
+    }
+
+
+
+    syncState('synced');
+
+    alert('Restored habits + '+count+' day(s) of history!');
+
+    renderToday();
+
+    if (document.getElementById('page-monthly').classList.contains('active')) renderMonthly();
+
+  } catch(e) {
+
+    syncState('error');
+
+    alert('Error restoring history: '+e.message);
+
+  }
+
 }
+
+
 
 // ── INIT ──
+
 async function initApp() {
-  initDates();
-  await showProfileScreen();
+
+  initDates();
+
+  await showProfileScreen();
+
 }
+
+
 
 async function loadProfileData() {
-  try {
-    syncState('syncing');
-    let saved = await window._fbGet('users/'+currentProfile+'/habits');
 
-    if (!saved) {
-      // First time for this profile — check for legacy root-level data to migrate
-      const legacyHabits = await window._fbGet('habits');
-      if (legacyHabits) {
-        habits = legacyHabits.map(h => ({...h, cat: h.cat||'morning'}));
-        await fbSaveHabits(habits);
+  try {
 
-        // Migrate legacy logs too
-        try {
-          const legacyLogs = await window._fbGet('logs');
-          if (legacyLogs) {
-            for (const k of Object.keys(legacyLogs)) {
-              await window._fbSet('users/'+currentProfile+'/logs/'+k, legacyLogs[k]);
-              logsCache[k] = legacyLogs[k];
-            }
-          }
-        } catch(e) {}
-      } else {
-        habits = JSON.parse(JSON.stringify(DEFAULTS));
-        await fbSaveHabits(habits);
-      }
-    } else {
-      habits = saved.map(h => ({...h, cat: h.cat||'morning'}));
-    }
-    syncState('synced');
-  } catch(e) { habits=JSON.parse(JSON.stringify(DEFAULTS)); syncState('error'); }
-  await fbGetLog(dateKey());
-  renderToday();
+    syncState('syncing');
+
+    let saved = await window._fbGet('users/'+currentProfile+'/habits');
+
+
+
+    if (!saved) {
+
+      // First time for this profile — check for legacy root-level data to migrate
+
+      const legacyHabits = await window._fbGet('habits');
+
+      if (legacyHabits) {
+
+        habits = legacyHabits.map(h => ({...h, cat: h.cat||'morning'}));
+
+        await fbSaveHabits(habits);
+
+
+
+        // Migrate legacy logs too
+
+        try {
+
+          const legacyLogs = await window._fbGet('logs');
+
+          if (legacyLogs) {
+
+            for (const k of Object.keys(legacyLogs)) {
+
+              await window._fbSet('users/'+currentProfile+'/logs/'+k, legacyLogs[k]);
+
+              logsCache[k] = legacyLogs[k];
+
+            }
+
+          }
+
+        } catch(e) {}
+
+      } else {
+
+        habits = JSON.parse(JSON.stringify(DEFAULTS));
+
+        await fbSaveHabits(habits);
+
+      }
+
+    } else {
+
+      habits = saved.map(h => ({...h, cat: h.cat||'morning'}));
+
+    }
+
+    syncState('synced');
+
+  } catch(e) { habits=JSON.parse(JSON.stringify(DEFAULTS)); syncState('error'); }
+
+  await fbGetLog(dateKey());
+
+  renderToday();
+
 }
+
+
 
 function initDates() {
-  const now=new Date();
-  const d1=document.getElementById('sidebarDay');
-  const d2=document.getElementById('sidebarRest');
-  if(d1) d1.textContent=String(now.getDate()).padStart(2,'0');
-  if(d2) d2.textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',year:'numeric'});
+
+  const now=new Date();
+
+  const d1=document.getElementById('sidebarDay');
+
+  const d2=document.getElementById('sidebarRest');
+
+  if(d1) d1.textContent=String(now.getDate()).padStart(2,'0');
+
+  if(d2) d2.textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',year:'numeric'});
+
 }
+
+
 
 // ── NAV ──
+
 function switchPage(id, el) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  el.classList.add('active');
-  if(id==='monthly') renderMonthly();
+
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+
+  document.getElementById('page-'+id).classList.add('active');
+
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+
+  el.classList.add('active');
+
+  if(id==='monthly') renderMonthly();
+
 }
+
+
 
 // ── TODAY ──
+
 async function renderToday() {
-  const log = await fbGetLog(dateKey());
 
-  CATS.forEach(cat => {
-    const list = document.getElementById('list-'+cat);
-    const countEl = document.getElementById('count-'+cat);
-    const catHabits = habits.filter(h=>h.cat===cat);
-    if(countEl) countEl.textContent = catHabits.length ? '('+catHabits.length+')' : '';
-    list.innerHTML = '';
+  const log = await fbGetLog(dateKey());
 
-    // Drop zone on the list itself (for cross-category)
-    list.ondragover = e => { e.preventDefault(); e.stopPropagation(); list.style.outline='1px dashed #444'; };
-    list.ondragleave = e => { if(!list.contains(e.relatedTarget)) list.style.outline='none'; };
-    list.ondrop = async e => {
-      e.preventDefault(); e.stopPropagation();
-      list.style.outline='none';
-      if(!dragSrcId) return;
-      const srcIdx = habits.findIndex(h=>h.id===dragSrcId);
-      if(srcIdx<0) return;
-      const [moved] = habits.splice(srcIdx,1);
-      moved.cat = cat;
-      habits.push(moved);
-      dragSrcId=null;
-      await fbSaveHabits(habits);
-      renderToday();
-    };
 
-    catHabits.forEach(h => {
-      const done = !!log[h.id];
-      const el = document.createElement('div');
-      el.className = 'habit-item'+(done?' done':'');
-      el.dataset.id = h.id;
-      el.draggable = true;
-      el.innerHTML = `
-        <div class="drag-handle">⠿</div>
-        <div class="habit-check" onclick="toggleHabit('${h.id}')">
-          <div class="hbox"><span class="hcheck">✓</span></div>
-        </div>
-        <div class="habit-body" onclick="toggleHabit('${h.id}')">
-          <span class="habit-name">${h.name}</span>
-          ${h.desc?`<span class="habit-desc">${h.desc}</span>`:''}
-        </div>
-        <div class="habit-actions">
-          <button class="hab-btn" onclick="openEditModal('${h.id}')">✎</button>
-          <button class="hab-btn del" onclick="deleteHabit('${h.id}')">✕</button>
-        </div>`;
 
-      // Drag events on item
-      el.addEventListener('dragstart', e => {
-        dragSrcId = h.id;
-        el.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-        e.stopPropagation();
-      });
-      el.addEventListener('dragend', () => {
-        el.classList.remove('dragging');
-        document.querySelectorAll('.drag-over').forEach(x=>x.classList.remove('drag-over'));
-        document.querySelectorAll('.habit-list').forEach(x=>x.style.outline='none');
-      });
-      el.addEventListener('dragover', e => {
-        e.preventDefault(); e.stopPropagation();
-        document.querySelectorAll('.drag-over').forEach(x=>x.classList.remove('drag-over'));
-        el.classList.add('drag-over');
-      });
-      el.addEventListener('drop', async e => {
-        e.preventDefault(); e.stopPropagation();
-        el.classList.remove('drag-over');
-        list.style.outline='none';
-        if(!dragSrcId || dragSrcId===h.id) return;
-        const srcIdx = habits.findIndex(x=>x.id===dragSrcId);
-        const tgtIdx = habits.findIndex(x=>x.id===h.id);
-        if(srcIdx<0||tgtIdx<0) return;
-        const [moved] = habits.splice(srcIdx,1);
-        moved.cat = cat;
-        habits.splice(tgtIdx,0,moved);
-        dragSrcId=null;
-        await fbSaveHabits(habits);
-        renderToday();
-      });
+  CATS.forEach(cat => {
 
-      list.appendChild(el);
-    });
-  });
+    const list = document.getElementById('list-'+cat);
 
-  renderTodayChart(log);
-  renderBirthdays(log);
+    const countEl = document.getElementById('count-'+cat);
+
+    const catHabits = habits.filter(h=>h.cat===cat);
+
+    if(countEl) countEl.textContent = catHabits.length ? '('+catHabits.length+')' : '';
+
+    list.innerHTML = '';
+
+
+
+    // Drop zone on the list itself (for cross-category)
+
+    list.ondragover = e => { e.preventDefault(); e.stopPropagation(); list.style.outline='1px dashed #444'; };
+
+    list.ondragleave = e => { if(!list.contains(e.relatedTarget)) list.style.outline='none'; };
+
+    list.ondrop = async e => {
+
+      e.preventDefault(); e.stopPropagation();
+
+      list.style.outline='none';
+
+      if(!dragSrcId) return;
+
+      const srcIdx = habits.findIndex(h=>h.id===dragSrcId);
+
+      if(srcIdx<0) return;
+
+      const [moved] = habits.splice(srcIdx,1);
+
+      moved.cat = cat;
+
+      habits.push(moved);
+
+      dragSrcId=null;
+
+      await fbSaveHabits(habits);
+
+      renderToday();
+
+    };
+
+
+
+    catHabits.forEach(h => {
+
+      const done = !!log[h.id];
+
+      const el = document.createElement('div');
+
+      el.className = 'habit-item'+(done?' done':'');
+
+      el.dataset.id = h.id;
+
+      el.draggable = true;
+
+      el.innerHTML = `
+
+        <div class="drag-handle">⠿</div>
+
+        <div class="habit-check" onclick="toggleHabit('${h.id}')">
+
+          <div class="hbox"><span class="hcheck">✓</span></div>
+
+        </div>
+
+        <div class="habit-body" onclick="toggleHabit('${h.id}')">
+
+          <span class="habit-name">${h.name}</span>
+
+          ${h.desc?`<span class="habit-desc">${h.desc}</span>`:''}
+
+        </div>
+
+        <div class="habit-actions">
+
+          <button class="hab-btn" onclick="openEditModal('${h.id}')">✎</button>
+
+          <button class="hab-btn del" onclick="deleteHabit('${h.id}')">✕</button>
+
+        </div>`;
+
+
+
+      // Drag events on item
+
+      el.addEventListener('dragstart', e => {
+
+        dragSrcId = h.id;
+
+        el.classList.add('dragging');
+
+        e.dataTransfer.effectAllowed = 'move';
+
+        e.stopPropagation();
+
+      });
+
+      el.addEventListener('dragend', () => {
+
+        el.classList.remove('dragging');
+
+        document.querySelectorAll('.drag-over').forEach(x=>x.classList.remove('drag-over'));
+
+        document.querySelectorAll('.habit-list').forEach(x=>x.style.outline='none');
+
+      });
+
+      el.addEventListener('dragover', e => {
+
+        e.preventDefault(); e.stopPropagation();
+
+        document.querySelectorAll('.drag-over').forEach(x=>x.classList.remove('drag-over'));
+
+        el.classList.add('drag-over');
+
+      });
+
+      el.addEventListener('drop', async e => {
+
+        e.preventDefault(); e.stopPropagation();
+
+        el.classList.remove('drag-over');
+
+        list.style.outline='none';
+
+        if(!dragSrcId || dragSrcId===h.id) return;
+
+        const srcIdx = habits.findIndex(x=>x.id===dragSrcId);
+
+        const tgtIdx = habits.findIndex(x=>x.id===h.id);
+
+        if(srcIdx<0||tgtIdx<0) return;
+
+        const [moved] = habits.splice(srcIdx,1);
+
+        moved.cat = cat;
+
+        habits.splice(tgtIdx,0,moved);
+
+        dragSrcId=null;
+
+        await fbSaveHabits(habits);
+
+        renderToday();
+
+      });
+
+
+
+      list.appendChild(el);
+
+    });
+
+  });
+
+
+
+  renderTodayChart(log);
+
+  renderBirthdays(log);
+
 }
+
+
 
 let dragSrcId = null;
 
+
+
 async function toggleHabit(id) {
-  const log = await fbGetLog(dateKey());
-  log[id] = !log[id];
-  if(!log[id]) delete log[id];
-  await fbSaveLog(dateKey(), log);
-  renderToday();
+
+  const log = await fbGetLog(dateKey());
+
+  log[id] = !log[id];
+
+  if(!log[id]) delete log[id];
+
+  await fbSaveLog(dateKey(), log);
+
+  renderToday();
+
 }
+
+
 
 function renderTodayChart(log) {
-  const done = habits.filter(h=>log[h.id]).length;
-  const total = habits.length;
-  const pct = total>0 ? Math.round(done/total*100) : 0;
-  const pctEl=document.getElementById('todayPct');
-  const fracEl=document.getElementById('todayFraction');
-  const barEl=document.getElementById('todayBar');
-  const chartEl=document.getElementById('todayMiniChart');
-  if(pctEl) pctEl.textContent=pct+'%';
-  if(fracEl) fracEl.textContent=done+' / '+total+' habits';
-  if(barEl) barEl.style.width=pct+'%';
-  if(chartEl) {
-    chartEl.innerHTML='';
-    habits.forEach(h=>{
-      const isDone=!!log[h.id];
-      chartEl.innerHTML+=`<div class="mini-row">
-        <span class="mini-lbl">${h.name}</span>
-        <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${isDone?100:0}%;background:${isDone?'#39ff14':'var(--border2)'}"></div></div>
-        <span class="mini-check" style="color:${isDone?'#39ff14':'var(--text3)'}">${isDone?'✓':'—'}</span>
-      </div>`;
-    });
-  }
+
+  const done = habits.filter(h=>log[h.id]).length;
+
+  const total = habits.length;
+
+  const pct = total>0 ? Math.round(done/total*100) : 0;
+
+  const pctEl=document.getElementById('todayPct');
+
+  const fracEl=document.getElementById('todayFraction');
+
+  const barEl=document.getElementById('todayBar');
+
+  const chartEl=document.getElementById('todayMiniChart');
+
+  if(pctEl) pctEl.textContent=pct+'%';
+
+  if(fracEl) fracEl.textContent=done+' / '+total+' habits';
+
+  if(barEl) barEl.style.width=pct+'%';
+
+  if(chartEl) {
+
+    chartEl.innerHTML='';
+
+    habits.forEach(h=>{
+
+      const isDone=!!log[h.id];
+
+      chartEl.innerHTML+=`<div class="mini-row">
+
+        <span class="mini-lbl">${h.name}</span>
+
+        <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${isDone?100:0}%;background:${isDone?'#39ff14':'var(--border2)'}"></div></div>
+
+        <span class="mini-check" style="color:${isDone?'#39ff14':'var(--text3)'}">${isDone?'✓':'—'}</span>
+
+      </div>`;
+
+    });
+
+  }
+
 }
+
+
 
 // ── ADD MODAL ──
+
 function openAddModal(cat) {
-  document.getElementById('addCat').value = cat;
-  document.getElementById('addName').value = '';
-  document.getElementById('addDesc').value = '';
-  document.getElementById('addModal').classList.add('open');
-  document.getElementById('addName').focus();
+
+  document.getElementById('addCat').value = cat;
+
+  document.getElementById('addName').value = '';
+
+  document.getElementById('addDesc').value = '';
+
+  document.getElementById('addModal').classList.add('open');
+
+  document.getElementById('addName').focus();
+
 }
+
 function closeAddModal() { document.getElementById('addModal').classList.remove('open'); }
 
+
+
 async function confirmAdd() {
-  const name = document.getElementById('addName').value.trim();
-  if(!name) return;
-  const cat  = document.getElementById('addCat').value;
-  const desc = document.getElementById('addDesc').value.trim();
-  habits.push({id:uidGen(), cat, emoji:'', name, desc});
-  await fbSaveHabits(habits);
-  closeAddModal(); renderToday();
+
+  const name = document.getElementById('addName').value.trim();
+
+  if(!name) return;
+
+  const cat  = document.getElementById('addCat').value;
+
+  const desc = document.getElementById('addDesc').value.trim();
+
+  habits.push({id:uidGen(), cat, emoji:'', name, desc});
+
+  await fbSaveHabits(habits);
+
+  closeAddModal(); renderToday();
+
 }
+
 document.getElementById('addModal').addEventListener('click', e=>{
-  if(e.target===document.getElementById('addModal')) closeAddModal();
+
+  if(e.target===document.getElementById('addModal')) closeAddModal();
+
 });
+
+
 
 // ── EDIT MODAL ──
+
 function openEditModal(id) {
-  const h=habits.find(x=>x.id===id); if(!h) return;
-  editingId=id;
-  document.getElementById('editCat').value  = h.cat||'morning';
-  document.getElementById('editName').value = h.name;
-  document.getElementById('editDesc').value = h.desc||'';
-  document.getElementById('editModal').classList.add('open');
-  document.getElementById('editName').focus();
+
+  const h=habits.find(x=>x.id===id); if(!h) return;
+
+  editingId=id;
+
+  document.getElementById('editCat').value  = h.cat||'morning';
+
+  document.getElementById('editName').value = h.name;
+
+  document.getElementById('editDesc').value = h.desc||'';
+
+  document.getElementById('editModal').classList.add('open');
+
+  document.getElementById('editName').focus();
+
 }
+
 function closeEditModal() { document.getElementById('editModal').classList.remove('open'); editingId=null; }
 
+
+
 async function saveEdit() {
-  if(!editingId) return;
-  const h=habits.find(x=>x.id===editingId); if(!h) return;
-  h.cat  = document.getElementById('editCat').value;
-  h.name = document.getElementById('editName').value.trim()||h.name;
-  h.desc = document.getElementById('editDesc').value.trim();
-  await fbSaveHabits(habits);
-  closeEditModal(); renderToday();
+
+  if(!editingId) return;
+
+  const h=habits.find(x=>x.id===editingId); if(!h) return;
+
+  h.cat  = document.getElementById('editCat').value;
+
+  h.name = document.getElementById('editName').value.trim()||h.name;
+
+  h.desc = document.getElementById('editDesc').value.trim();
+
+  await fbSaveHabits(habits);
+
+  closeEditModal(); renderToday();
+
 }
+
 document.getElementById('editModal').addEventListener('click', e=>{
-  if(e.target===document.getElementById('editModal')) closeEditModal();
+
+  if(e.target===document.getElementById('editModal')) closeEditModal();
+
 });
+
+
 
 async function deleteHabit(id) {
-  if(!confirm('Remove this habit?')) return;
-  habits=habits.filter(h=>h.id!==id);
-  await fbSaveHabits(habits);
-  renderToday();
+
+  if(!confirm('Remove this habit?')) return;
+
+  habits=habits.filter(h=>h.id!==id);
+
+  await fbSaveHabits(habits);
+
+  renderToday();
+
 }
+
+
 
 // ── DAY MODAL (EDITABLE) ──
+
 let currentDayKey = null;
 
+
+
 async function openDayModal(key, label) {
-  currentDayKey = key;
-  document.getElementById('dayModalTitle').textContent = label;
-  await renderDayModal();
-  document.getElementById('dayModal').classList.add('open');
+
+  currentDayKey = key;
+
+  document.getElementById('dayModalTitle').textContent = label;
+
+  await renderDayModal();
+
+  document.getElementById('dayModal').classList.add('open');
+
 }
+
+
 
 async function renderDayModal() {
-  const log = await fbGetLog(currentDayKey);
-  const list = document.getElementById('dayModalList');
-  list.innerHTML = '';
-  CATS.forEach(cat => {
-    const catHabits = habits.filter(h => h.cat === cat);
-    if (!catHabits.length) return;
-    const labels = {morning:'MORNING', night:'NIGHT', other:'OTHER'};
-    list.innerHTML += `<div style="font-size:9px;letter-spacing:.2em;color:var(--text3);text-transform:uppercase;margin:14px 0 6px">${labels[cat]}</div>`;
-    catHabits.forEach(h => {
-      const done = !!log[h.id];
-      list.innerHTML += `
-        <div onclick="toggleDayHabit('${h.id}')" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer">
-          <div style="width:15px;height:15px;border:1px solid ${done?'#39ff14':'var(--border2)'};border-radius:1px;background:${done?'#39ff14':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s">
-            ${done?'<span style="color:#111;font-size:9px;font-weight:700">✓</span>':''}
-          </div>
-          <span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:${done?'#39ff14':'var(--text2)'}">${h.name}</span>
-        </div>`;
-    });
-  });
+
+  const log = await fbGetLog(currentDayKey);
+
+  const list = document.getElementById('dayModalList');
+
+  list.innerHTML = '';
+
+  CATS.forEach(cat => {
+
+    const catHabits = habits.filter(h => h.cat === cat);
+
+    if (!catHabits.length) return;
+
+    const labels = {morning:'MORNING', night:'NIGHT', other:'OTHER'};
+
+    list.innerHTML += `<div style="font-size:9px;letter-spacing:.2em;color:var(--text3);text-transform:uppercase;margin:14px 0 6px">${labels[cat]}</div>`;
+
+    catHabits.forEach(h => {
+
+      const done = !!log[h.id];
+
+      list.innerHTML += `
+
+        <div onclick="toggleDayHabit('${h.id}')" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer">
+
+          <div style="width:15px;height:15px;border:1px solid ${done?'#39ff14':'var(--border2)'};border-radius:1px;background:${done?'#39ff14':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s">
+
+            ${done?'<span style="color:#111;font-size:9px;font-weight:700">✓</span>':''}
+
+          </div>
+
+          <span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:${done?'#39ff14':'var(--text2)'}">${h.name}</span>
+
+        </div>`;
+
+    });
+
+  });
+
 }
+
+
 
 async function toggleDayHabit(id) {
-  const log = await fbGetLog(currentDayKey);
-  log[id] = !log[id];
-  if (!log[id]) delete log[id];
-  await fbSaveLog(currentDayKey, log);
-  await renderDayModal();
-  // refresh monthly calendar in background
-  renderMonthly();
+
+  const log = await fbGetLog(currentDayKey);
+
+  log[id] = !log[id];
+
+  if (!log[id]) delete log[id];
+
+  await fbSaveLog(currentDayKey, log);
+
+  await renderDayModal();
+
+  // refresh monthly calendar in background
+
+  renderMonthly();
+
 }
+
+
 
 function closeDayModal() { document.getElementById('dayModal').classList.remove('open'); currentDayKey=null; }
+
 document.getElementById('dayModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('dayModal')) closeDayModal();
+
+  if (e.target === document.getElementById('dayModal')) closeDayModal();
+
 });
 
+
+
 // ── MONTHLY ──
+
 async function renderMonthly() {
-  const now=new Date();
-  const year=now.getFullYear(), month=now.getMonth(), today=now.getDate();
-  const dim=new Date(year,month+1,0).getDate();
-  const rawDow=new Date(year,month,1).getDay(); // 0=Sun..6=Sat
-  const fdow=(rawDow+6)%7; // shift so Monday=0..Sunday=6
-  const lbl=document.getElementById('calLabel');
-  if(lbl) lbl.textContent=now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
 
-  const ps=[];
-  for(let d=1;d<=today;d++) ps.push(fbGetLog(year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0')));
-  await Promise.all(ps);
+  const now=new Date();
 
-  const grid=document.getElementById('calGrid');
-  grid.innerHTML='';
-  ['Mo','Tu','We','Th','Fr','Sa','Su'].forEach(d=>{
-    const h=document.createElement('div'); h.className='cal-head'; h.textContent=d; grid.appendChild(h);
-  });
-  for(let i=0;i<fdow;i++){const e=document.createElement('div');e.className='cal-day empty';grid.appendChild(e);}
+  const year=now.getFullYear(), month=now.getMonth(), today=now.getDate();
 
-  let full=0,partial=0,missed=0,tPoss=0,tDone=0;
-  const habitDone = {};
-  habits.forEach(h => habitDone[h.id] = 0);
+  const dim=new Date(year,month+1,0).getDate();
 
-  for(let d=1;d<=dim;d++){
-    const cell=document.createElement('div'); cell.className='cal-day';
-    const dn=document.createElement('div'); dn.className='dn'; dn.textContent=d; cell.appendChild(dn);
+  const rawDow=new Date(year,month,1).getDay(); // 0=Sun..6=Sat
 
-    if(d>today){ cell.classList.add('future'); }
-    else {
-      const k=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-      const log=logsCache[k]||{};
-      const cnt=habits.filter(h=>log[h.id]).length;
-      const tot=habits.length;
-      tPoss+=tot; tDone+=cnt;
-      habits.forEach(h=>{ if(log[h.id]) habitDone[h.id]++; });
-      if(d===today) cell.classList.add('today-cell');
-      if(tot===0) cell.classList.add('nodata');
-      else if(cnt===tot){cell.classList.add('full');full++;}
-      else if(cnt>0){cell.classList.add('partial');partial++;}
-      else{cell.classList.add('zero');missed++;}
-      if(cnt>0){
-        const dd=document.createElement('div'); dd.className='dd';
-        habits.forEach((_,idx)=>{
-          const dot=document.createElement('div'); dot.className='dot';
-          dot.style.background='#39ff14';
-          dot.style.opacity=log[habits[idx]?.id]?'1':'0.1';
-          dd.appendChild(dot);
-        });
-        cell.appendChild(dd);
-      }
-      cell.style.cursor='pointer';
-      const label=new Date(year,month,d).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
-      cell.addEventListener('click',()=>openDayModal(k,label));
-    }
-    grid.appendChild(cell);
-  }
+  const fdow=(rawDow+6)%7; // shift so Monday=0..Sunday=6
 
-  const pct=tPoss>0?Math.round(tDone/tPoss*100):0;
-  const mp=document.getElementById('monthPct'); if(mp) mp.innerHTML=pct+'<span class="stat-unit">%</span>';
-  const mb=document.getElementById('monthBar'); if(mb) mb.style.width=pct+'%';
+  const lbl=document.getElementById('calLabel');
 
-  let streak=0;
-  for(let d=today;d>=1;d--){
-    const k=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-    const log=logsCache[k]||{};
-    if(habits.length>0&&habits.filter(h=>log[h.id]).length===habits.length) streak++;
-    else break;
-  }
-  const sn=document.getElementById('streakNum'); if(sn) sn.innerHTML=streak+'<span class="stat-unit"> days</span>';
+  if(lbl) lbl.textContent=now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
 
-  renderMonthlyPie(tDone,tPoss);
-  renderHabitBars(habitDone, today);
-  renderSparkline();
+
+
+  const ps=[];
+
+  for(let d=1;d<=today;d++) ps.push(fbGetLog(year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0')));
+
+  await Promise.all(ps);
+
+
+
+  const grid=document.getElementById('calGrid');
+
+  grid.innerHTML='';
+
+  ['Mo','Tu','We','Th','Fr','Sa','Su'].forEach(d=>{
+
+    const h=document.createElement('div'); h.className='cal-head'; h.textContent=d; grid.appendChild(h);
+
+  });
+
+  for(let i=0;i<fdow;i++){const e=document.createElement('div');e.className='cal-day empty';grid.appendChild(e);}
+
+
+
+  let full=0,partial=0,missed=0,tPoss=0,tDone=0;
+
+  const habitDone = {};
+
+  habits.forEach(h => habitDone[h.id] = 0);
+
+
+
+  for(let d=1;d<=dim;d++){
+
+    const cell=document.createElement('div'); cell.className='cal-day';
+
+    const dn=document.createElement('div'); dn.className='dn'; dn.textContent=d; cell.appendChild(dn);
+
+
+
+    if(d>today){ cell.classList.add('future'); }
+
+    else {
+
+      const k=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+
+      const log=logsCache[k]||{};
+
+      const cnt=habits.filter(h=>log[h.id]).length;
+
+      const tot=habits.length;
+
+      tPoss+=tot; tDone+=cnt;
+
+      habits.forEach(h=>{ if(log[h.id]) habitDone[h.id]++; });
+
+      if(d===today) cell.classList.add('today-cell');
+
+      if(tot===0) cell.classList.add('nodata');
+
+      else if(cnt===tot){cell.classList.add('full');full++;}
+
+      else if(cnt>0){cell.classList.add('partial');partial++;}
+
+      else{cell.classList.add('zero');missed++;}
+
+      if(cnt>0){
+
+        const dd=document.createElement('div'); dd.className='dd';
+
+        habits.forEach((_,idx)=>{
+
+          const dot=document.createElement('div'); dot.className='dot';
+
+          dot.style.background='#39ff14';
+
+          dot.style.opacity=log[habits[idx]?.id]?'1':'0.1';
+
+          dd.appendChild(dot);
+
+        });
+
+        cell.appendChild(dd);
+
+      }
+
+      cell.style.cursor='pointer';
+
+      const label=new Date(year,month,d).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+
+      cell.addEventListener('click',()=>openDayModal(k,label));
+
+    }
+
+    grid.appendChild(cell);
+
+  }
+
+
+
+  const pct=tPoss>0?Math.round(tDone/tPoss*100):0;
+
+  const mp=document.getElementById('monthPct'); if(mp) mp.innerHTML=pct+'<span class="stat-unit">%</span>';
+
+  const mb=document.getElementById('monthBar'); if(mb) mb.style.width=pct+'%';
+
+
+
+  let streak=0;
+
+  for(let d=today;d>=1;d--){
+
+    const k=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+
+    const log=logsCache[k]||{};
+
+    if(habits.length>0&&habits.filter(h=>log[h.id]).length===habits.length) streak++;
+
+    else break;
+
+  }
+
+  const sn=document.getElementById('streakNum'); if(sn) sn.innerHTML=streak+'<span class="stat-unit"> days</span>';
+
+
+
+  renderMonthlyPie(tDone,tPoss);
+
+  renderHabitBars(habitDone, today);
+
+  renderSparkline();
+
 }
+
+
 
 function renderHabitBars(habitDone, daysPassed) {
-  const el = document.getElementById('habitBars');
-  if (!el) return;
-  el.innerHTML = '';
-  if (!habits.length) {
-    el.innerHTML = '<div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em">No habits yet</div>';
-    return;
-  }
-  habits.forEach(h => {
-    const pct = daysPassed > 0 ? Math.round((habitDone[h.id]||0) / daysPassed * 100) : 0;
-    el.innerHTML += `
-      <div class="bar-row">
-        <span class="bar-lbl">${h.name}</span>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-        <span class="bar-val">${pct}%</span>
-      </div>`;
-  });
+
+  const el = document.getElementById('habitBars');
+
+  if (!el) return;
+
+  el.innerHTML = '';
+
+  if (!habits.length) {
+
+    el.innerHTML = '<div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em">No habits yet</div>';
+
+    return;
+
+  }
+
+  habits.forEach(h => {
+
+    const pct = daysPassed > 0 ? Math.round((habitDone[h.id]||0) / daysPassed * 100) : 0;
+
+    el.innerHTML += `
+
+      <div class="bar-row">
+
+        <span class="bar-lbl">${h.name}</span>
+
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+
+        <span class="bar-val">${pct}%</span>
+
+      </div>`;
+
+  });
+
 }
+
+
 
 function renderMonthlyPie(done,total) {
-  const svg=document.getElementById('monthPie');
-  const legend=document.getElementById('monthPieLegend');
-  if(!svg) return;
-  const cx=60,cy=60,r=50,ir=28;
-  const notDone=total-done;
-  const pct=total>0?Math.round(done/total*100):0;
-  if(total===0){
-    svg.innerHTML=`<circle cx="60" cy="60" r="50" fill="none" stroke="#2a2a2a" stroke-width="14"/>
-      <text x="60" y="65" text-anchor="middle" font-family="Cormorant Garamond,serif" font-size="13" fill="#444">No data</text>`;
-    if(legend) legend.innerHTML=''; return;
-  }
-  const slices=[{val:done,color:'#39ff14'},{val:notDone,color:'#1e1e1e'}].filter(s=>s.val>0);
-  const px=(a,rad)=>[cx+rad*Math.cos(a),cy+rad*Math.sin(a)];
-  let angle=-Math.PI/2, paths='';
-  slices.forEach(s=>{
-    const sweep=s.val/total*2*Math.PI, end=angle+sweep;
-    const [x1,y1]=px(angle,r),[x2,y2]=px(end,r);
-    const [ix1,iy1]=px(end,ir),[ix2,iy2]=px(angle,ir);
-    const lg=sweep>Math.PI?1:0;
-    paths+=`<path d="M${x1},${y1} A${r},${r},0,${lg},1,${x2},${y2} L${ix1},${iy1} A${ir},${ir},0,${lg},0,${ix2},${iy2} Z" fill="${s.color}" stroke="#0d0d0d" stroke-width="1.5"/>`;
-    angle=end;
-  });
-  paths+=`<text x="60" y="55" text-anchor="middle" font-family="Cormorant Garamond,serif" font-size="18" font-weight="300" fill="#fff">${pct}%</text>
-    <text x="60" y="67" text-anchor="middle" font-family="Rajdhani,sans-serif" font-size="7" letter-spacing="2" fill="#555">THIS MONTH</text>`;
-  svg.innerHTML=paths;
-  if(legend) legend.innerHTML=`
-    <div class="legend-item"><div class="legend-l"><div class="legend-dot" style="background:#39ff14"></div><span class="legend-name">Completed</span></div><span class="legend-val">${done}</span></div>
-    <div class="legend-item"><div class="legend-l"><div class="legend-dot" style="background:#333"></div><span class="legend-name">Remaining</span></div><span class="legend-val">${notDone}</span></div>`;
+
+  const svg=document.getElementById('monthPie');
+
+  const legend=document.getElementById('monthPieLegend');
+
+  if(!svg) return;
+
+  const cx=60,cy=60,r=50,ir=28;
+
+  const notDone=total-done;
+
+  const pct=total>0?Math.round(done/total*100):0;
+
+  if(total===0){
+
+    svg.innerHTML=`<circle cx="60" cy="60" r="50" fill="none" stroke="#2a2a2a" stroke-width="14"/>
+
+      <text x="60" y="65" text-anchor="middle" font-family="Cormorant Garamond,serif" font-size="13" fill="#444">No data</text>`;
+
+    if(legend) legend.innerHTML=''; return;
+
+  }
+
+  const slices=[{val:done,color:'#39ff14'},{val:notDone,color:'#1e1e1e'}].filter(s=>s.val>0);
+
+  const px=(a,rad)=>[cx+rad*Math.cos(a),cy+rad*Math.sin(a)];
+
+  let angle=-Math.PI/2, paths='';
+
+  slices.forEach(s=>{
+
+    const sweep=s.val/total*2*Math.PI, end=angle+sweep;
+
+    const [x1,y1]=px(angle,r),[x2,y2]=px(end,r);
+
+    const [ix1,iy1]=px(end,ir),[ix2,iy2]=px(angle,ir);
+
+    const lg=sweep>Math.PI?1:0;
+
+    paths+=`<path d="M${x1},${y1} A${r},${r},0,${lg},1,${x2},${y2} L${ix1},${iy1} A${ir},${ir},0,${lg},0,${ix2},${iy2} Z" fill="${s.color}" stroke="#0d0d0d" stroke-width="1.5"/>`;
+
+    angle=end;
+
+  });
+
+  paths+=`<text x="60" y="55" text-anchor="middle" font-family="Cormorant Garamond,serif" font-size="18" font-weight="300" fill="#fff">${pct}%</text>
+
+    <text x="60" y="67" text-anchor="middle" font-family="Rajdhani,sans-serif" font-size="7" letter-spacing="2" fill="#555">THIS MONTH</text>`;
+
+  svg.innerHTML=paths;
+
+  if(legend) legend.innerHTML=`
+
+    <div class="legend-item"><div class="legend-l"><div class="legend-dot" style="background:#39ff14"></div><span class="legend-name">Completed</span></div><span class="legend-val">${done}</span></div>
+
+    <div class="legend-item"><div class="legend-l"><div class="legend-dot" style="background:#333"></div><span class="legend-name">Remaining</span></div><span class="legend-val">${notDone}</span></div>`;
+
 }
+
+
 
 function renderSparkline() {
-  const svg=document.getElementById('sparkSvg');
-  if(!svg) return;
-  const W=svg.clientWidth||600, H=60, days=30, pad=4;
-  const now=new Date(); const pts=[]; const counts=[]; const dateLabels=[];
-  for(let i=days-1;i>=0;i--){
-    const d=new Date(now); d.setDate(d.getDate()-i);
-    const k=dateKey(d); const log=logsCache[k]||{};
-    const cnt = habits.filter(h=>log[h.id]).length;
-    counts.push(cnt);
-    dateLabels.push(d.toLocaleDateString('en-US',{month:'short',day:'numeric'}));
-    pts.push(habits.length>0?cnt/habits.length:0);
-  }
-  const xStep=W/(days-1);
-  let area=`M0,${H}`, line='', first=true;
-  pts.forEach((p,i)=>{
-    const x=i*xStep, y=H-pad-p*(H-pad*2);
-    area+=` L${x},${y}`;
-    if(first){line=`M${x},${y}`;first=false;} else line+=` L${x},${y}`;
-  });
-  area+=` L${(days-1)*xStep},${H} Z`;
-  let grid='';
-  [0,.5,1].forEach(v=>{
-    const y=H-pad-v*(H-pad*2);
-    grid+=`<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="#1a1a1a" stroke-width="1"/>`;
-  });
 
-  // Invisible hover/touch targets + visible dot markers (shown on hover via JS)
-  let touchPoints = '';
-  pts.forEach((p,i)=>{
-    const x=i*xStep, y=H-pad-p*(H-pad*2);
-    touchPoints += `<circle class="spark-point" data-x="${x}" data-y="${y}" data-frac="${counts[i]}/${habits.length}" data-date="${dateLabels[i]}" cx="${x}" cy="${y}" r="9" fill="transparent" style="cursor:pointer"/>`;
-  });
+  const svg=document.getElementById('sparkSvg');
 
-  svg.innerHTML=`<defs>
-    <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#39ff14" stop-opacity="0.3"/>
-      <stop offset="100%" stop-color="#39ff14" stop-opacity="0"/>
-    </linearGradient>
-    <filter id="glow"><feGaussianBlur stdDeviation="1.5" result="blur"/>
-      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-  </defs>${grid}
-  <path d="${area}" fill="url(#sg)"/>
-  <path d="${line}" fill="none" stroke="#39ff14" stroke-width="1.5" stroke-linejoin="round" filter="url(#glow)"/>
-  <circle id="sparkHoverDot" cx="0" cy="0" r="3" fill="#39ff14" style="display:none;pointer-events:none"/>
-  ${touchPoints}`;
+  if(!svg) return;
 
-  initSparkTooltip(svg);
+  const W=svg.clientWidth||600, H=60, days=30, pad=4;
+
+  const now=new Date(); const pts=[]; const counts=[]; const dateLabels=[];
+
+  for(let i=days-1;i>=0;i--){
+
+    const d=new Date(now); d.setDate(d.getDate()-i);
+
+    const k=dateKey(d); const log=logsCache[k]||{};
+
+    const cnt = habits.filter(h=>log[h.id]).length;
+
+    counts.push(cnt);
+
+    dateLabels.push(d.toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+
+    pts.push(habits.length>0?cnt/habits.length:0);
+
+  }
+
+  const xStep=W/(days-1);
+
+  let area=`M0,${H}`, line='', first=true;
+
+  pts.forEach((p,i)=>{
+
+    const x=i*xStep, y=H-pad-p*(H-pad*2);
+
+    area+=` L${x},${y}`;
+
+    if(first){line=`M${x},${y}`;first=false;} else line+=` L${x},${y}`;
+
+  });
+
+  area+=` L${(days-1)*xStep},${H} Z`;
+
+  let grid='';
+
+  [0,.5,1].forEach(v=>{
+
+    const y=H-pad-v*(H-pad*2);
+
+    grid+=`<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="#1a1a1a" stroke-width="1"/>`;
+
+  });
+
+
+
+  // Invisible hover/touch targets + visible dot markers (shown on hover via JS)
+
+  let touchPoints = '';
+
+  pts.forEach((p,i)=>{
+
+    const x=i*xStep, y=H-pad-p*(H-pad*2);
+
+    touchPoints += `<circle class="spark-point" data-x="${x}" data-y="${y}" data-frac="${counts[i]}/${habits.length}" data-date="${dateLabels[i]}" cx="${x}" cy="${y}" r="9" fill="transparent" style="cursor:pointer"/>`;
+
+  });
+
+
+
+  svg.innerHTML=`<defs>
+
+    <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
+
+      <stop offset="0%" stop-color="#39ff14" stop-opacity="0.3"/>
+
+      <stop offset="100%" stop-color="#39ff14" stop-opacity="0"/>
+
+    </linearGradient>
+
+    <filter id="glow"><feGaussianBlur stdDeviation="1.5" result="blur"/>
+
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+
+  </defs>${grid}
+
+  <path d="${area}" fill="url(#sg)"/>
+
+  <path d="${line}" fill="none" stroke="#39ff14" stroke-width="1.5" stroke-linejoin="round" filter="url(#glow)"/>
+
+  <circle id="sparkHoverDot" cx="0" cy="0" r="3" fill="#39ff14" style="display:none;pointer-events:none"/>
+
+  ${touchPoints}`;
+
+
+
+  initSparkTooltip(svg);
+
 }
+
+
 
 function initSparkTooltip(svg) {
-  // Create tooltip element once, positioned relative to the spark-card
-  let tip = document.getElementById('sparkTooltip');
-  const card = svg.closest('.spark-card');
-  if (!tip) {
-    tip = document.createElement('div');
-    tip.id = 'sparkTooltip';
-    tip.style.cssText = 'position:absolute;background:var(--surface2);border:1px solid var(--border2);border-radius:2px;padding:6px 10px;font-size:10px;letter-spacing:.05em;color:var(--text);pointer-events:none;display:none;z-index:50;white-space:nowrap;transform:translate(-50%,-130%);box-shadow:0 4px 12px rgba(0,0,0,.4);';
-    card.style.position = 'relative';
-    card.appendChild(tip);
-  }
-  const hoverDot = document.getElementById('sparkHoverDot');
 
-  function showTip(el, clientX, clientY) {
-    const frac = el.getAttribute('data-frac');
-    const date = el.getAttribute('data-date');
-    const x = el.getAttribute('data-x');
-    const y = el.getAttribute('data-y');
-    tip.innerHTML = `<strong style="color:#39ff14">${frac}</strong>`;
-    tip.style.left = (parseFloat(x)/svg.clientWidth*100) + '%';
-    tip.style.top = (parseFloat(y)/60*100) + '%';
-    tip.style.display = 'block';
-    hoverDot.setAttribute('cx', x);
-    hoverDot.setAttribute('cy', y);
-    hoverDot.style.display = 'block';
-  }
-  function hideTip() {
-    tip.style.display = 'none';
-    hoverDot.style.display = 'none';
-  }
+  // Create tooltip element once, positioned relative to the spark-card
 
-  svg.querySelectorAll('.spark-point').forEach(el => {
-    el.addEventListener('mouseenter', () => showTip(el));
-    el.addEventListener('mouseleave', hideTip);
-    el.addEventListener('touchstart', e => { e.preventDefault(); showTip(el); }, {passive:false});
-  });
-  svg.addEventListener('touchend', () => setTimeout(hideTip, 1500));
-  document.addEventListener('click', e => {
-    if (!svg.contains(e.target)) hideTip();
-  });
+  let tip = document.getElementById('sparkTooltip');
+
+  const card = svg.closest('.spark-card');
+
+  if (!tip) {
+
+    tip = document.createElement('div');
+
+    tip.id = 'sparkTooltip';
+
+    tip.style.cssText = 'position:absolute;background:var(--surface2);border:1px solid var(--border2);border-radius:2px;padding:6px 10px;font-size:10px;letter-spacing:.05em;color:var(--text);pointer-events:none;display:none;z-index:50;white-space:nowrap;transform:translate(-50%,-130%);box-shadow:0 4px 12px rgba(0,0,0,.4);';
+
+    card.style.position = 'relative';
+
+    card.appendChild(tip);
+
+  }
+
+  const hoverDot = document.getElementById('sparkHoverDot');
+
+
+
+  function showTip(el, clientX, clientY) {
+
+    const frac = el.getAttribute('data-frac');
+
+    const date = el.getAttribute('data-date');
+
+    const x = el.getAttribute('data-x');
+
+    const y = el.getAttribute('data-y');
+
+    tip.innerHTML = `<strong style="color:#39ff14">${frac}</strong>`;
+
+    tip.style.left = (parseFloat(x)/svg.clientWidth*100) + '%';
+
+    tip.style.top = (parseFloat(y)/60*100) + '%';
+
+    tip.style.display = 'block';
+
+    hoverDot.setAttribute('cx', x);
+
+    hoverDot.setAttribute('cy', y);
+
+    hoverDot.style.display = 'block';
+
+  }
+
+  function hideTip() {
+
+    tip.style.display = 'none';
+
+    hoverDot.style.display = 'none';
+
+  }
+
+
+
+  svg.querySelectorAll('.spark-point').forEach(el => {
+
+    el.addEventListener('mouseenter', () => showTip(el));
+
+    el.addEventListener('mouseleave', hideTip);
+
+    el.addEventListener('touchstart', e => { e.preventDefault(); showTip(el); }, {passive:false});
+
+  });
+
+  svg.addEventListener('touchend', () => setTimeout(hideTip, 1500));
+
+  document.addEventListener('click', e => {
+
+    if (!svg.contains(e.target)) hideTip();
+
+  });
+
 }
+
 </script>
+
 </body>
+
 </html>
-εχω αυτον τον κωδικα και θελω να αλλαξω το χρωμα οπου εχει μαυρο το onyx και οπου   πρασινο το candy blue δειξει μου πως να το κανω και τι πρεπει να πειραξω στον κωδικα 
