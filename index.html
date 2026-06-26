@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Rajdhani:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #020202;
+  --bg: #171717;
   --surface: #161616;
   --surface2: #1e1e1e;
   --border: #2a2a2a;
@@ -15,7 +15,7 @@
   --text: #ffffff;
   --text2: #e0e0e0;
   --text3: #aaaaaa;
-  --neon: #B2D5E5;
+  --neon: #C6FF34;
   --white: #ffffff;
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
@@ -100,7 +100,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
 .habit-item{display:flex;align-items:stretch;background:var(--surface);border:1px solid var(--border);margin-bottom:5px;border-radius:2px;position:relative;overflow:hidden;transition:all .2s;}
 .habit-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--border2);transition:background .2s;}
 .habit-item.done::before{background:var(--neon);}
-.habit-item.done{border-color:rgba(178,213,229,.15);background:rgba(178,213,229,.02);}
+.habit-item.done{border-color:rgba(198,255,52,.15);background:rgba(198,255,52,.02);}
 .habit-item.dragging{opacity:.4;border-style:dashed;}
 .habit-item.drag-over{border-color:var(--white);transform:translateY(-2px);}
 
@@ -109,7 +109,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
 .drag-handle:active{cursor:grabbing;}
 
 .habit-check{width:48px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-right:1px solid var(--border);transition:background .2s;flex-shrink:0;}
-.habit-check:hover{background:rgba(178,213,229,.06);}
+.habit-check:hover{background:rgba(198,255,52,.06);}
 .hbox{width:15px;height:15px;border:1px solid var(--border2);border-radius:1px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
 .habit-item.done .hbox{background:var(--neon);border-color:var(--neon);}
 .hcheck{color:#111;font-size:9px;font-weight:700;opacity:0;transition:opacity .2s;}
@@ -173,7 +173,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
 .cal-day.nodata{border-color:var(--border);background:rgba(255,255,255,.01);}
 .cal-day.partial{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.04);}
 .cal-day.partial .dn{color:var(--text2);}
-.cal-day.full{border-color:rgba(178,213,229,.4);background:rgba(178,213,229,.07);}
+.cal-day.full{border-color:rgba(198,255,52,.4);background:rgba(198,255,52,.07);}
 .cal-day.full .dn{color:var(--neon);}
 .cal-day.zero .dn{color:var(--border2);}
 .cal-day.today-cell{box-shadow:0 0 0 1px var(--white);}
@@ -197,7 +197,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
 .spark-svg{width:100%;height:60px;margin-top:12px;overflow:visible;}
 
 /* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(2,2,2,.8);display:none;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px);}
+.modal-overlay{position:fixed;inset:0;background:rgba(23,23,23,.8);display:none;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px);}
 .modal-overlay.open{display:flex;}
 .modal{background:var(--surface2);border:1px solid var(--border2);border-radius:2px;padding:28px;width:340px;animation:fadeIn .2s;}
 .modal-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300;color:var(--white);margin-bottom:20px;}
@@ -893,8 +893,8 @@ function renderTodayChart(log) {
       const isDone=!!log[h.id];
       chartEl.innerHTML+=`<div class="mini-row">
         <span class="mini-lbl">${h.name}</span>
-        <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${isDone?100:0}%;background:${isDone?'#B2D5E5':'var(--border2)'}"></div></div>
-        <span class="mini-check" style="color:${isDone?'#B2D5E5':'var(--text3)'}">${isDone?'✓':'—'}</span>
+        <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${isDone?100:0}%;background:${isDone?'#C6FF34':'var(--border2)'}"></div></div>
+        <span class="mini-check" style="color:${isDone?'#C6FF34':'var(--text3)'}">${isDone?'✓':'—'}</span>
       </div>`;
     });
   }
@@ -978,10 +978,10 @@ async function renderDayModal() {
       const done = !!log[h.id];
       list.innerHTML += `
         <div onclick="toggleDayHabit('${h.id}')" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer">
-          <div style="width:15px;height:15px;border:1px solid ${done?'#B2D5E5':'var(--border2)'};border-radius:1px;background:${done?'#B2D5E5':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s">
+          <div style="width:15px;height:15px;border:1px solid ${done?'#C6FF34':'var(--border2)'};border-radius:1px;background:${done?'#C6FF34':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s">
             ${done?'<span style="color:#111;font-size:9px;font-weight:700">✓</span>':''}
           </div>
-          <span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:${done?'#B2D5E5':'var(--text2)'}">${h.name}</span>
+          <span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:${done?'#C6FF34':'var(--text2)'}">${h.name}</span>
         </div>`;
     });
   });
@@ -1048,7 +1048,7 @@ async function renderMonthly() {
         const dd=document.createElement('div'); dd.className='dd';
         habits.forEach((_,idx)=>{
           const dot=document.createElement('div'); dot.className='dot';
-          dot.style.background='#B2D5E5';
+          dot.style.background='#C6FF34';
           dot.style.opacity=log[habits[idx]?.id]?'1':'0.1';
           dd.appendChild(dot);
         });
@@ -1110,7 +1110,7 @@ function renderMonthlyPie(done,total) {
       <text x="60" y="65" text-anchor="middle" font-family="Cormorant Garamond,serif" font-size="13" fill="#444">No data</text>`;
     if(legend) legend.innerHTML=''; return;
   }
-  const slices=[{val:done,color:'#B2D5E5'},{val:notDone,color:'#1e1e1e'}].filter(s=>s.val>0);
+  const slices=[{val:done,color:'#C6FF34'},{val:notDone,color:'#1e1e1e'}].filter(s=>s.val>0);
   const px=(a,rad)=>[cx+rad*Math.cos(a),cy+rad*Math.sin(a)];
   let angle=-Math.PI/2, paths='';
   slices.forEach(s=>{
@@ -1125,7 +1125,7 @@ function renderMonthlyPie(done,total) {
     <text x="60" y="67" text-anchor="middle" font-family="Rajdhani,sans-serif" font-size="7" letter-spacing="2" fill="#555">THIS MONTH</text>`;
   svg.innerHTML=paths;
   if(legend) legend.innerHTML=`
-    <div class="legend-item"><div class="legend-l"><div class="legend-dot" style="background:#B2D5E5"></div><span class="legend-name">Completed</span></div><span class="legend-val">${done}</span></div>
+    <div class="legend-item"><div class="legend-l"><div class="legend-dot" style="background:#C6FF34"></div><span class="legend-name">Completed</span></div><span class="legend-val">${done}</span></div>
     <div class="legend-item"><div class="legend-l"><div class="legend-dot" style="background:#333"></div><span class="legend-name">Remaining</span></div><span class="legend-val">${notDone}</span></div>`;
 }
 
@@ -1165,15 +1165,15 @@ function renderSparkline() {
 
   svg.innerHTML=`<defs>
     <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#B2D5E5" stop-opacity="0.3"/>
-      <stop offset="100%" stop-color="#B2D5E5" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#C6FF34" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#C6FF34" stop-opacity="0"/>
     </linearGradient>
     <filter id="glow"><feGaussianBlur stdDeviation="1.5" result="blur"/>
       <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   </defs>${grid}
   <path d="${area}" fill="url(#sg)"/>
-  <path d="${line}" fill="none" stroke="#B2D5E5" stroke-width="1.5" stroke-linejoin="round" filter="url(#glow)"/>
-  <circle id="sparkHoverDot" cx="0" cy="0" r="3" fill="#B2D5E5" style="display:none;pointer-events:none"/>
+  <path d="${line}" fill="none" stroke="#C6FF34" stroke-width="1.5" stroke-linejoin="round" filter="url(#glow)"/>
+  <circle id="sparkHoverDot" cx="0" cy="0" r="3" fill="#C6FF34" style="display:none;pointer-events:none"/>
   ${touchPoints}`;
 
   initSparkTooltip(svg);
@@ -1197,7 +1197,7 @@ function initSparkTooltip(svg) {
     const date = el.getAttribute('data-date');
     const x = el.getAttribute('data-x');
     const y = el.getAttribute('data-y');
-    tip.innerHTML = `<strong style="color:#B2D5E5">${frac}</strong>`;
+    tip.innerHTML = `<strong style="color:#C6FF34">${frac}</strong>`;
     tip.style.left = (parseFloat(x)/svg.clientWidth*100) + '%';
     tip.style.top = (parseFloat(y)/60*100) + '%';
     tip.style.display = 'block';
