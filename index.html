@@ -797,53 +797,29 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
 <!-- EDIT MODAL -->
 
 <div class="modal-overlay" id="editModal">
-
   <div class="modal">
-
     <div class="modal-title">Edit Habit</div>
-
     <div class="modal-field">
-
       <label class="modal-lbl">Category</label>
-
       <select class="modal-select" id="editCat">
-
         <option value="morning">Morning</option>
-
         <option value="night">Night</option>
-
         <option value="other">Other</option>
-
       </select>
-
     </div>
-
     <div class="modal-field">
-
       <label class="modal-lbl">Name</label>
-
       <input class="modal-input" id="editName" maxlength="40">
-
     </div>
-
     <div class="modal-field">
-
       <label class="modal-lbl">Note</label>
-
       <input class="modal-input" id="editDesc" maxlength="50">
-
     </div>
-
     <div class="modal-actions">
-
       <button class="form-btn no" onclick="closeEditModal()">Cancel</button>
-
       <button class="form-btn ok" onclick="saveEdit()">Save</button>
-
     </div>
-
   </div>
-
 </div>
 
 
@@ -851,19 +827,12 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
 <!-- DAY HISTORY MODAL -->
 
 <div class="modal-overlay" id="dayModal">
-
   <div class="modal">
-
     <div class="modal-title" id="dayModalTitle">—</div>
-
     <div style="font-size:9px;letter-spacing:.2em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Tap to toggle</div>
-
     <div id="dayModalList"></div>
-
     <div class="modal-actions"><button class="form-btn no" onclick="closeDayModal()">Close</button></div>
-
   </div>
-
 </div>
 
 
@@ -871,43 +840,28 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
 <!-- Firebase -->
 
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-
 import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 
 
 const firebaseConfig = {
-
   apiKey: "AIzaSyAY_pgwygy35AtpB-Pos3ZRzqQIIK0vD50",
-
   authDomain: "habit-tracker-f4111.firebaseapp.com",
-
   databaseURL: "https://habit-tracker-f4111-default-rtdb.europe-west1.firebasedatabase.app",
-
   projectId: "habit-tracker-f4111",
-
   storageBucket: "habit-tracker-f4111.firebasestorage.app",
-
   messagingSenderId: "297813265108",
-
   appId: "1:297813265108:web:0e3ce4657d35ba38980941"
-
 };
 
 
 
 const fbApp = initializeApp(firebaseConfig);
-
 const db = getDatabase(fbApp);
-
 window._fbSet = async (path, data) => { await set(ref(db, path), data); };
-
 window._fbGet = async (path) => { const s = await get(ref(db, path)); return s.exists() ? s.val() : null; };
-
 window.addEventListener('load', () => initApp());
-
 </script>
 
 
@@ -917,47 +871,28 @@ window.addEventListener('load', () => initApp());
 // ── STATE ──
 
 const DEFAULTS = [
-
   {id:'h1', cat:'morning', name:'Wake Up Early', desc:''},
-
   {id:'h2', cat:'morning', name:'Raed book',     desc:''},
-
   {id:'h3', cat:'morning', name:'Gym',     desc:''},
-
 ];
 
 const CATS = ['morning','night','other'];
 
-
-
-  
-
 const BIRTHDAYS = [
-
   { id:'bday1', name:'Κεχαγίας', month:7, day:27 },
-
   { id:'bday1', name:'Κατσούρας', month:10, day:27 },
-
   { id:'bday1', name:'Θάνος', month:8, day:18 },
-
   { id:'bday1', name:'Γιώργος', month:4, day:11 },
-
   { id:'bday1', name:'Φίλιππος', month:5, day:12 },
-
   { id:'bday1', name:'Αγγελής', month:6, day:30 },
-
-  { id:'bday1', name:'Άγγελος', month:6, day:30 },
-
+  { id:'bday1', name:'Άγγελος', month:11, day:8 },
   { id:'bday1', name:'Ορεστ', month:6, day:30 },
-
   { id:'bday1', name:'Εύα', month:5, day:12 },
-
   { id:'bday1', name:'Πατέρας', month:5, day:9 },
-
   { id:'bday1', name:'Μάνα', month:4, day:29 },
-
   { id:'bday1', name:'Αγαπούλα', month:4, day:5 },
-
+  { id:'bday1', name:'Σιώζος', month:7, day:29 },
+  { id:'bday1', name:'Κύργιος', month:5, day:26 },
 ];
 
 
