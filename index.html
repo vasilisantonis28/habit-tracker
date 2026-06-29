@@ -233,7 +233,17 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
 .modal-select{width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:12px;padding:9px 12px;border-radius:2px;outline:none;}
 .modal-actions{display:flex;gap:8px;margin-top:20px;justify-content:flex-end;}
 
-@media(max-width:860px){
+/* VAULT */
+.vault-chunk{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.vault-chunk::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--border2);transition:background .2s;}
+.vault-chunk.paid::before{background:var(--neon);}
+.vault-chunk.paid{border-color:rgba(57,255,20,.2);background:rgba(57,255,20,.03);}
+.vault-chunk-amount{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300;color:var(--text);transition:color .2s;}
+.vault-chunk.paid .vault-chunk-amount{color:var(--neon);}
+.vault-chunk-euro{font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;}
+.vault-chunk.paid .vault-chunk-euro{color:var(--neon);opacity:.7;}
+.vault-chunk-check{font-size:10px;color:var(--neon);margin-top:4px;opacity:0;transition:opacity .2s;}
+.vault-chunk.paid .vault-chunk-check{opacity:1;}
   .app{grid-template-columns:1fr;}
   .sidebar{position:static;height:auto;}
   .main{padding:20px 14px;}
@@ -280,6 +290,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
     <nav class="nav">
       <div class="nav-item active" onclick="switchPage('today',this)">◈ &nbsp; Today</div>
       <div class="nav-item" onclick="switchPage('monthly',this)">◫ &nbsp; Monthly</div>
+      <div class="nav-item" onclick="openVault()">◉ &nbsp; Vault</div>
     </nav>
     <div class="sidebar-date">
       <div class="sidebar-day" id="sidebarDay"></div>
@@ -391,6 +402,52 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
       </div>
     </section>
 
+    <!-- VAULT -->
+    <section class="page" id="page-vault">
+      <div class="page-header">
+        <div class="page-title">The <span>Vault</span></div>
+      </div>
+
+      <!-- Setup: enter total amount -->
+      <div id="vaultSetup" style="display:none">
+        <div style="max-width:400px">
+          <div class="card-label" style="margin-bottom:16px">Enter your savings goal</div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <input class="modal-input" id="vaultAmount" type="number" min="2" placeholder="Amount (€)" style="flex:1;font-size:18px;padding:12px 16px">
+            <button class="form-btn ok" onclick="generateVaultChunks()">Generate</button>
+          </div>
+          <div style="font-size:10px;color:var(--text3);letter-spacing:.1em;margin-top:10px;text-transform:uppercase">The amount will be split into random chunks of 2€–30€</div>
+        </div>
+      </div>
+
+      <!-- Chunks table -->
+      <div id="vaultContent" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+          <div style="display:flex;gap:24px">
+            <div>
+              <div style="font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;color:#fff;line-height:1" id="vaultSaved">0€</div>
+              <div style="font-size:9px;letter-spacing:.2em;color:var(--text3);text-transform:uppercase;margin-top:4px">Saved</div>
+            </div>
+            <div>
+              <div style="font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;color:var(--text3);line-height:1" id="vaultTotal">0€</div>
+              <div style="font-size:9px;letter-spacing:.2em;color:var(--text3);text-transform:uppercase;margin-top:4px">Goal</div>
+            </div>
+            <div>
+              <div style="font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;color:var(--neon);line-height:1" id="vaultPct">0%</div>
+              <div style="font-size:9px;letter-spacing:.2em;color:var(--text3);text-transform:uppercase;margin-top:4px">Complete</div>
+            </div>
+          </div>
+          <button class="form-btn no" style="font-size:9px" onclick="resetVault()">Reset vault</button>
+        </div>
+
+        <div class="pct-bar" style="margin-bottom:28px">
+          <div class="pct-bar-fill" id="vaultBar" style="width:0%"></div>
+        </div>
+
+        <div id="vaultGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px"></div>
+      </div>
+    </section>
+
   </main>
 </div>
 
@@ -455,6 +512,22 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;fo
     <div style="font-size:9px;letter-spacing:.2em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Tap to toggle</div>
     <div id="dayModalList"></div>
     <div class="modal-actions"><button class="form-btn no" onclick="closeDayModal()">Close</button></div>
+  </div>
+</div>
+
+<!-- VAULT PASSWORD MODAL -->
+<div class="modal-overlay" id="vaultPwModal">
+  <div class="modal">
+    <div class="modal-title">Vault Access</div>
+    <div class="modal-field">
+      <label class="modal-lbl" id="vaultPwLabel">Enter password</label>
+      <input class="modal-input" id="vaultPwInput" type="password" placeholder="••••••••" maxlength="50">
+      <div id="vaultPwError" style="color:#c0392b;font-size:10px;letter-spacing:.1em;margin-top:8px;display:none">Incorrect password</div>
+    </div>
+    <div class="modal-actions">
+      <button class="form-btn no" onclick="closeVaultModal()">Cancel</button>
+      <button class="form-btn ok" id="vaultPwBtn" onclick="handleVaultPassword()">Enter</button>
+    </div>
   </div>
 </div>
 
@@ -1233,6 +1306,193 @@ function initSparkTooltip(svg) {
   document.addEventListener('click', e => {
     if (!svg.contains(e.target)) hideTip();
   });
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// VAULT
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const VAULT_PW_HASH_KEY = 'vault_pw';
+let vaultUnlocked = false;
+let vaultMode = null; // 'enter'|'set'
+
+// Simple hash function (not cryptographic, just obfuscation)
+function simpleHash(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return hash.toString(36);
+}
+
+async function fbGetVault() {
+  try { return await window._fbGet('users/'+currentProfile+'/vault') || {}; }
+  catch(e) { return {}; }
+}
+async function fbSaveVault(data) {
+  syncState('syncing');
+  try { await window._fbSet('users/'+currentProfile+'/vault', data); syncState('synced'); }
+  catch(e) { syncState('error'); }
+}
+
+function openVault() {
+  // Check if password is set
+  const vault = null; // will check async
+  checkAndOpenVault();
+}
+
+async function checkAndOpenVault() {
+  const data = await fbGetVault();
+  const modal = document.getElementById('vaultPwModal');
+  const label = document.getElementById('vaultPwLabel');
+  const btn   = document.getElementById('vaultPwBtn');
+  const input = document.getElementById('vaultPwInput');
+  const err   = document.getElementById('vaultPwError');
+
+  input.value = '';
+  err.style.display = 'none';
+
+  if (!data.pwHash) {
+    // No password set yet — set one
+    vaultMode = 'set';
+    label.textContent = 'Set a vault password';
+    btn.textContent = 'Set Password';
+  } else {
+    vaultMode = 'enter';
+    label.textContent = 'Enter vault password';
+    btn.textContent = 'Enter';
+  }
+  modal.classList.add('open');
+  setTimeout(() => input.focus(), 100);
+}
+
+async function handleVaultPassword() {
+  const input = document.getElementById('vaultPwInput');
+  const err   = document.getElementById('vaultPwError');
+  const pw = input.value.trim();
+  if (!pw) return;
+
+  const data = await fbGetVault();
+
+  if (vaultMode === 'set') {
+    data.pwHash = simpleHash(pw);
+    await fbSaveVault(data);
+    closeVaultModal();
+    enterVaultPage(data);
+  } else {
+    if (simpleHash(pw) === data.pwHash) {
+      closeVaultModal();
+      enterVaultPage(data);
+    } else {
+      err.style.display = 'block';
+      input.value = '';
+      input.focus();
+    }
+  }
+}
+
+document.getElementById('vaultPwInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleVaultPassword();
+  if (e.key === 'Escape') closeVaultModal();
+});
+
+function closeVaultModal() {
+  document.getElementById('vaultPwModal').classList.remove('open');
+  vaultMode = null;
+}
+
+function enterVaultPage(data) {
+  vaultUnlocked = true;
+  // Switch to vault page
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-vault').classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item')[2].classList.add('active');
+  renderVault(data);
+}
+
+function renderVault(data) {
+  const setup   = document.getElementById('vaultSetup');
+  const content = document.getElementById('vaultContent');
+
+  if (!data.chunks || !data.chunks.length) {
+    setup.style.display = 'block';
+    content.style.display = 'none';
+  } else {
+    setup.style.display = 'none';
+    content.style.display = 'block';
+    renderVaultGrid(data);
+  }
+}
+
+function generateVaultChunks() {
+  const input = document.getElementById('vaultAmount');
+  let total = parseFloat(input.value);
+  if (!total || total < 2) { input.focus(); return; }
+  total = Math.round(total);
+
+  // Generate random chunks between 2 and 30
+  const chunks = [];
+  let remaining = total;
+  while (remaining > 0) {
+    const maxChunk = Math.min(30, remaining);
+    const minChunk = Math.min(2, remaining);
+    const chunk = minChunk === maxChunk ? minChunk : Math.floor(Math.random() * (maxChunk - minChunk + 1)) + minChunk;
+    chunks.push({ amount: chunk, paid: false });
+    remaining -= chunk;
+  }
+  // Shuffle
+  for (let i = chunks.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [chunks[i], chunks[j]] = [chunks[j], chunks[i]];
+  }
+
+  const data = { chunks, total, pwHash: null };
+  // preserve password
+  fbGetVault().then(existing => {
+    data.pwHash = existing.pwHash;
+    fbSaveVault(data).then(() => renderVault(data));
+  });
+}
+
+function renderVaultGrid(data) {
+  const grid = document.getElementById('vaultGrid');
+  grid.innerHTML = '';
+  const chunks = data.chunks || [];
+  const total  = data.total || 0;
+  const saved  = chunks.filter(c=>c.paid).reduce((a,c)=>a+c.amount, 0);
+  const pct    = total > 0 ? Math.round(saved/total*100) : 0;
+
+  document.getElementById('vaultSaved').textContent = saved+'€';
+  document.getElementById('vaultTotal').textContent = total+'€';
+  document.getElementById('vaultPct').textContent   = pct+'%';
+  document.getElementById('vaultBar').style.width   = pct+'%';
+
+  chunks.forEach((c, i) => {
+    const el = document.createElement('div');
+    el.className = 'vault-chunk' + (c.paid ? ' paid' : '');
+    el.innerHTML = `
+      <div class="vault-chunk-amount">${c.amount}</div>
+      <div class="vault-chunk-euro">euro</div>
+      <div class="vault-chunk-check">✓</div>`;
+    el.addEventListener('click', () => toggleVaultChunk(i));
+    grid.appendChild(el);
+  });
+}
+
+async function toggleVaultChunk(idx) {
+  const data = await fbGetVault();
+  data.chunks[idx].paid = !data.chunks[idx].paid;
+  await fbSaveVault(data);
+  renderVaultGrid(data);
+}
+
+async function resetVault() {
+  if (!confirm('Reset the vault? This will clear all chunks and progress but keep your password.')) return;
+  const data = await fbGetVault();
+  const pwHash = data.pwHash;
+  await fbSaveVault({ pwHash });
+  renderVault({ pwHash });
 }
 </script>
 </body>
